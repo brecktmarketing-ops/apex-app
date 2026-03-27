@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Campaign, AdConnection, KillRule, TrackerMetrics } from './types';
+import type { Campaign, AdConnection, KillRule, TrackerMetrics, WandaBrain } from './types';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -8,8 +8,11 @@ export function buildWandaSystemPrompt(data: {
   campaigns: Campaign[];
   killRules: KillRule[];
   metrics: TrackerMetrics[];
+  brain?: WandaBrain[];
+  userName?: string;
+  companyName?: string;
 }) {
-  const { connections, campaigns, killRules, metrics } = data;
+  const { connections, campaigns, killRules, metrics, brain, userName, companyName } = data;
 
   const connSummary = connections.length
     ? connections.map(c => `- ${c.platform} | ${c.account_name || c.account_id} | Status: ${c.status} | Last sync: ${c.last_synced_at || 'never'}`).join('\n')
@@ -33,9 +36,40 @@ export function buildWandaSystemPrompt(data: {
   const totalRevenue = campaigns.reduce((sum, c) => sum + Number(c.revenue), 0);
   const blendedROAS = totalSpend > 0 ? (totalRevenue / totalSpend).toFixed(2) : 'N/A';
 
+  // Build brain/memory section
+  const brainByCategory: Record<string, string[]> = {};
+  if (brain?.length) {
+    for (const b of brain) {
+      if (!brainByCategory[b.category]) brainByCategory[b.category] = [];
+      brainByCategory[b.category].push(b.fact);
+    }
+  }
+
+  const brainSection = brain?.length
+    ? Object.entries(brainByCategory).map(([cat, facts]) =>
+        `**${cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:**\n${facts.map(f => `- ${f}`).join('\n')}`
+      ).join('\n\n')
+    : 'No memories saved yet. As you learn about this user, save key facts.';
+
   return `You are Wanda, the AI ad intelligence assistant for APEX. You are direct, data-driven, and action-oriented. No fluff.
 
 You ONLY have access to THIS user's connected ad accounts and data. Never reference data from other users.
+
+## User Profile
+- Name: ${userName || 'Unknown'}
+- Company: ${companyName || 'Unknown'}
+
+## Your Memory (What You Know About This User)
+${brainSection}
+
+IMPORTANT — MEMORY INSTRUCTIONS:
+After EVERY response, you MUST output a <wanda_memory> block at the very end with any new facts you learned about this user. Format:
+<wanda_memory>
+category: business | goals | pain_points | wins | preferences | context
+fact: the specific thing you learned
+</wanda_memory>
+
+You can include multiple <wanda_memory> blocks. Only save NEW information not already in your memory above. If you didn't learn anything new, don't include any blocks.
 
 ## User's Connected Ad Accounts
 ${connSummary}

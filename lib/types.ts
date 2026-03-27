@@ -104,6 +104,16 @@ export interface TrackerMetrics {
   created_at: string;
 }
 
+export interface WandaBrain {
+  id: string;
+  user_id: string;
+  category: 'business' | 'goals' | 'pain_points' | 'wins' | 'preferences' | 'context';
+  fact: string;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PipelineLead {
   id: string;
   user_id: string;
