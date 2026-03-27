@@ -240,7 +240,7 @@ BODY COPY:
                   <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>AI Model</label>
                   <select value={imageModel} onChange={e => setImageModel(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
                     <option value="dalle3">DALL-E 3 (Best for ads)</option>
-                    <option value="imagen">Imagen 3 / Nano Banana</option>
+                    <option value="imagen">Imagen 4.0 / Nano Banana</option>
                     <option value="pollinations">Pollinations (Free)</option>
                   </select>
                 </div>

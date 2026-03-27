@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       if ((selectedModel === 'imagen' || selectedModel === 'dalle3') && googleKey) {
         try {
           const imagenRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${googleKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${googleKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       if (googleKey) {
         try {
           const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${googleKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${googleKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         const width = aspect_ratio === '9:16' ? 720 : aspect_ratio === '16:9' ? 1280 : aspect_ratio === '4:5' ? 800 : 1024;
         const height = aspect_ratio === '9:16' ? 1280 : aspect_ratio === '16:9' ? 720 : aspect_ratio === '4:5' ? 1000 : 1024;
 
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Date.now()}`;
+        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Date.now()}&model=flux`;
         const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(30000) });
         if (imgRes.ok) {
           const buffer = await imgRes.arrayBuffer();
