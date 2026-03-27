@@ -144,6 +144,16 @@ const COLUMNS: ColumnDef[] = [
 ];
 
 const STORAGE_KEY = 'apex_visible_columns';
+const PRESETS_KEY = 'apex_column_presets';
+const WIDTHS_KEY = 'apex_column_widths';
+
+const DEFAULT_PRESETS: Record<string, string[]> = {
+  'Default': ['spend', 'revenue', 'roas', 'ctr', 'impressions'],
+  'Performance': ['spend', 'revenue', 'roas', 'ctr', 'cpm', 'cpc', 'cpl'],
+  'Engagement': ['impressions', 'clicks', 'ctr', 'reach', 'frequency', 'hook_rate'],
+  'Sales': ['spend', 'revenue', 'roas', 'leads', 'cpl', 'purchases'],
+  'All': COLUMNS.map(c => c.key),
+};
 
 function getInitialColumns(): string[] {
   if (typeof window === 'undefined') return COLUMNS.filter(c => c.defaultVisible).map(c => c.key);
@@ -152,6 +162,24 @@ function getInitialColumns(): string[] {
     if (saved) return JSON.parse(saved);
   } catch {}
   return COLUMNS.filter(c => c.defaultVisible).map(c => c.key);
+}
+
+function getSavedPresets(): Record<string, string[]> {
+  if (typeof window === 'undefined') return DEFAULT_PRESETS;
+  try {
+    const saved = localStorage.getItem(PRESETS_KEY);
+    if (saved) return { ...DEFAULT_PRESETS, ...JSON.parse(saved) };
+  } catch {}
+  return DEFAULT_PRESETS;
+}
+
+function getSavedWidths(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = localStorage.getItem(WIDTHS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return {};
 }
 
 function ratingStyle(rating: 'good' | 'mid' | 'bad' | null): React.CSSProperties {
@@ -181,6 +209,12 @@ export default function DashboardPage() {
   const calRef = useRef<HTMLDivElement>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getInitialColumns);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
+  const [presets, setPresets] = useState<Record<string, string[]>>(getSavedPresets);
+  const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(getSavedWidths);
+  const [resizing, setResizing] = useState<string | null>(null);
+  const presetRef = useRef<HTMLDivElement>(null);
   const [showLauncher, setShowLauncher] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchForm, setLaunchForm] = useState({ name: '', objective: 'OUTCOME_LEADS', daily_budget: '50', targeting_age_min: '25', targeting_age_max: '55', targeting_genders: 'all', targeting_interests: '', geo: 'US', headline: '', body: '', link: '', cta: 'LEARN_MORE' });
@@ -202,10 +236,61 @@ export default function DashboardPage() {
     function handleClick(e: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setShowColumnPicker(false);
       if (calRef.current && !calRef.current.contains(e.target as Node)) setShowCalendar(false);
+      if (presetRef.current && !presetRef.current.contains(e.target as Node)) setShowPresetMenu(false);
     }
-    if (showColumnPicker || showCalendar) document.addEventListener('mousedown', handleClick);
+    if (showColumnPicker || showCalendar || showPresetMenu) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [showColumnPicker, showCalendar]);
+  }, [showColumnPicker, showCalendar, showPresetMenu]);
+
+  // Column resize handler
+  useEffect(() => {
+    if (!resizing) return;
+    function onMouseMove(e: MouseEvent) {
+      setColumnWidths(prev => {
+        const next = { ...prev, [resizing!]: Math.max(60, e.movementX + (prev[resizing!] || 100)) };
+        localStorage.setItem(WIDTHS_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+    function onMouseUp() { setResizing(null); }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); };
+  }, [resizing]);
+
+  function applyPreset(name: string) {
+    const cols = presets[name];
+    if (cols) {
+      setVisibleColumns(cols);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cols));
+    }
+    setShowPresetMenu(false);
+  }
+
+  function savePreset() {
+    if (!newPresetName.trim()) return;
+    const updated = { ...presets, [newPresetName.trim()]: visibleColumns };
+    setPresets(updated);
+    const custom: Record<string, string[]> = {};
+    for (const [k, v] of Object.entries(updated)) {
+      if (!(k in DEFAULT_PRESETS)) custom[k] = v;
+    }
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(custom));
+    setNewPresetName('');
+    setShowPresetMenu(false);
+  }
+
+  function deletePreset(name: string) {
+    if (name in DEFAULT_PRESETS) return;
+    const updated = { ...presets };
+    delete updated[name];
+    setPresets(updated);
+    const custom: Record<string, string[]> = {};
+    for (const [k, v] of Object.entries(updated)) {
+      if (!(k in DEFAULT_PRESETS)) custom[k] = v;
+    }
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(custom));
+  }
 
   function toggleColumn(key: string) {
     setVisibleColumns(prev => {
@@ -254,7 +339,7 @@ export default function DashboardPage() {
   }
 
   const activeColumns = COLUMNS.filter(col => visibleColumns.includes(col.key));
-  const gridTemplate = `44px 2fr ${activeColumns.map(c => c.width).join(' ')} 80px`;
+  const gridTemplate = `44px 2fr ${activeColumns.map(c => columnWidths[c.key] ? `${columnWidths[c.key]}px` : c.width).join(' ')} 80px`;
 
   const totalSpend = campaigns.reduce((s, c) => s + Number(c.spend), 0);
   const totalRevenue = campaigns.reduce((s, c) => s + Number(c.revenue), 0);
@@ -330,6 +415,54 @@ export default function DashboardPage() {
                     {col.rating && <span style={{ fontSize: 10, color: 'var(--dim)', marginLeft: 'auto' }}>scored</span>}
                   </button>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Presets */}
+          <div ref={presetRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowPresetMenu(!showPresetMenu)}
+              style={{
+                padding: '7px 14px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+                fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--muted)',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Presets
+            </button>
+            {showPresetMenu && (
+              <div style={{
+                position: 'absolute', top: '100%', right: 0, marginTop: 6, width: 220, zIndex: 50,
+                background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
+                boxShadow: 'var(--shadow-lg)', padding: '8px 0',
+              }}>
+                <div style={{ padding: '8px 14px 6px', fontSize: 11, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Load Preset</div>
+                {Object.keys(presets).map(name => (
+                  <div key={name} style={{ display: 'flex', alignItems: 'center', padding: '0 14px' }}>
+                    <button
+                      onClick={() => applyPreset(name)}
+                      style={{ flex: 1, padding: '8px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, color: 'var(--text)', textAlign: 'left' }}
+                    >{name}</button>
+                    {!(name in DEFAULT_PRESETS) && (
+                      <button onClick={() => deletePreset(name)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', fontSize: 11, padding: '4px' }}>x</button>
+                    )}
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid var(--border)', margin: '6px 0', padding: '8px 14px 4px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>Save Current</div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input
+                      value={newPresetName}
+                      onChange={e => setNewPresetName(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && savePreset()}
+                      placeholder="Preset name"
+                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 6, fontSize: 12, color: 'var(--text)', outline: 'none', fontFamily: 'inherit' }}
+                    />
+                    <button onClick={savePreset} style={{ padding: '6px 10px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -577,7 +710,15 @@ export default function DashboardPage() {
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6 }}></div>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6 }}>Campaign</div>
             {activeColumns.map(col => (
-              <div key={col.key} style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6 }}>{col.label}</div>
+              <div key={col.key} style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6, position: 'relative', userSelect: 'none', display: 'flex', alignItems: 'center' }}>
+                {col.label}
+                <div
+                  onMouseDown={() => setResizing(col.key)}
+                  style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 6, cursor: 'col-resize', background: resizing === col.key ? 'var(--accent)' : 'transparent', borderRadius: 2, transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-glow)')}
+                  onMouseLeave={e => { if (resizing !== col.key) e.currentTarget.style.background = 'transparent'; }}
+                />
+              </div>
             ))}
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6 }}>Status</div>
           </div>

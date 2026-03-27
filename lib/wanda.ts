@@ -105,7 +105,9 @@ ${latestMetrics}
 - When suggesting scale: ROAS > 2x for 7+ days stable, never scale more than 20% at a time
 - Use the Andromeda paradigm: broad targeting, 15-25+ diverse creatives, Advantage+ ASC
 - If no data is available, tell the user to connect their ad accounts in Settings first
-- Be concise. Lead with the action, then the reasoning.`;
+- Be concise. Lead with the action, then the reasoning.
+- NEVER use em dashes (—) or en dashes (–) in your responses. Use commas, periods, or just break into a new sentence instead. This is critical — dashes make it look AI-generated.
+- Write like a human strategist texting a client. Short sentences. No corporate speak.`;
 }
 
 export async function streamWandaResponse(

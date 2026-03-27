@@ -10,24 +10,22 @@ export async function POST(request: NextRequest) {
     const { type, prompt, aspect_ratio } = await request.json();
 
     if (type === 'image') {
-      // Nano Banana / Gemini image generation
       const apiKey = process.env.GOOGLE_AI_API_KEY;
       if (!apiKey) return NextResponse.json({ error: 'Google AI API key not configured' }, { status: 500 });
 
+      // Use Imagen 3 for image generation
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `Generate an ad creative image: ${prompt}. Make it high quality, professional, suitable for paid advertising on Meta/Google/TikTok. Clean composition, bold visuals.`
-              }]
+            instances: [{
+              prompt: `Professional ad creative: ${prompt}. High quality, suitable for paid advertising on Meta/Google/TikTok. Clean composition, bold visuals, commercial photography style.`
             }],
-            generationConfig: {
-              responseModalities: ['IMAGE', 'TEXT'],
-              responseMimeType: 'image/png',
+            parameters: {
+              sampleCount: 1,
+              aspectRatio: aspect_ratio || '1:1',
             }
           }),
         }
@@ -36,17 +34,51 @@ export async function POST(request: NextRequest) {
       const data = await res.json();
 
       if (data.error) {
-        return NextResponse.json({ error: data.error.message || 'Gemini error' }, { status: 500 });
+        // Fallback to Gemini 2.0 Flash with correct config
+        const fallbackRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `Generate an ad creative image: ${prompt}. Make it high quality, professional, suitable for paid advertising. Clean composition, bold visuals.`
+                }]
+              }],
+              generationConfig: {
+                responseModalities: ['IMAGE', 'TEXT'],
+              }
+            }),
+          }
+        );
+
+        const fallbackData = await fallbackRes.json();
+
+        if (fallbackData.error) {
+          return NextResponse.json({ error: fallbackData.error.message || 'Image generation failed' }, { status: 500 });
+        }
+
+        const parts = fallbackData.candidates?.[0]?.content?.parts || [];
+        const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image'));
+
+        if (imagePart) {
+          return NextResponse.json({
+            type: 'image',
+            image: `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`,
+            prompt,
+          });
+        }
+
+        return NextResponse.json({ error: 'No image generated. Try a different prompt.' }, { status: 500 });
       }
 
-      // Extract image from response
-      const parts = data.candidates?.[0]?.content?.parts || [];
-      const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image'));
-
-      if (imagePart) {
+      // Imagen 3 response
+      const predictions = data.predictions || [];
+      if (predictions.length > 0 && predictions[0].bytesBase64Encoded) {
         return NextResponse.json({
           type: 'image',
-          image: `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`,
+          image: `data:image/png;base64,${predictions[0].bytesBase64Encoded}`,
           prompt,
         });
       }
@@ -54,7 +86,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No image generated. Try a different prompt.' }, { status: 500 });
 
     } else if (type === 'video') {
-      // Higgsfield video generation
       const apiKey = process.env.HIGGSFIELD_API_KEY;
       const apiSecret = process.env.HIGGSFIELD_API_SECRET;
       if (!apiKey || !apiSecret) return NextResponse.json({ error: 'Higgsfield API keys not configured' }, { status: 500 });

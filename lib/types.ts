@@ -119,11 +119,18 @@ export interface PipelineLead {
   user_id: string;
   name: string;
   business: string | null;
+  email: string | null;
+  phone: string | null;
   location: string | null;
   stage: 'raw' | 'contacted' | 'replied' | 'active';
   tags: string[];
   notes: string | null;
   source: string | null;
+  platform: string | null;
+  campaign_id: string | null;
+  campaign_name: string | null;
+  purchase_amount: number | null;
+  purchase_date: string | null;
   created_at: string;
   updated_at: string;
 }

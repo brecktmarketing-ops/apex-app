@@ -109,8 +109,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Strip memory blocks from the response the user sees
-    const cleanText = stripMemoryBlocks(rawText);
+    // Strip memory blocks and em dashes from the response the user sees
+    const cleanText = stripMemoryBlocks(rawText).replace(/—/g, ',').replace(/–/g, ',');
 
     // Save assistant response (clean version)
     if (convId) {
