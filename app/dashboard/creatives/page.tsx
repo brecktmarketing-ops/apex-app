@@ -32,8 +32,9 @@ export default function CreativesPage() {
   // Image state
   const [imagePrompt, setImagePrompt] = useState('');
   const [imageAspect, setImageAspect] = useState('1:1');
+  const [imageModel, setImageModel] = useState('dalle3');
   const [generatingImage, setGeneratingImage] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState<{ src: string; prompt: string }[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<{ src: string; prompt: string; model?: string }[]>([]);
 
   // Video state
   const [videoPrompt, setVideoPrompt] = useState('');
@@ -96,12 +97,12 @@ BODY COPY:
       const res = await fetch('/api/creatives/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'image', prompt: imagePrompt, aspect_ratio: imageAspect }),
+        body: JSON.stringify({ type: 'image', prompt: imagePrompt, aspect_ratio: imageAspect, model: imageModel }),
       });
       const data = await res.json();
       if (data.error) { alert('Image generation failed: ' + data.error); }
       else if (data.image) {
-        setGeneratedImages(prev => [{ src: data.image, prompt: data.prompt }, ...prev]);
+        setGeneratedImages(prev => [{ src: data.image, prompt: data.prompt, model: data.model }, ...prev]);
       }
     } catch (e: any) { alert('Error: ' + e.message); }
     setGeneratingImage(false);
@@ -231,14 +232,24 @@ BODY COPY:
         <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 16, alignItems: 'start' }}>
           <div style={card}>
             <p style={lbl}>Image Generator (Nano Banana)</p>
-            <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>Describe your ad image and we'll generate it with AI. Powered by Gemini.</p>
+            <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>Describe your ad image and we'll generate it with AI.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <textarea value={imagePrompt} onChange={e => setImagePrompt(e.target.value)} placeholder="e.g. Clean product shot of a peptide vial on dark background with green glow, professional ad creative" rows={4} style={{ ...input, resize: 'vertical', lineHeight: 1.5 }} />
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>Aspect Ratio</label>
-                <select value={imageAspect} onChange={e => setImageAspect(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
-                  {ASPECTS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>AI Model</label>
+                  <select value={imageModel} onChange={e => setImageModel(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
+                    <option value="dalle3">DALL-E 3 (Best for ads)</option>
+                    <option value="imagen">Imagen 3 / Nano Banana</option>
+                    <option value="pollinations">Pollinations (Free)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>Aspect Ratio</label>
+                  <select value={imageAspect} onChange={e => setImageAspect(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
+                    {ASPECTS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                  </select>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {['Professional product shot on dark background', 'UGC style selfie with product', 'Before and after transformation', 'Bold text overlay ad with stats', 'Lifestyle shot, person using product'].map(q => (

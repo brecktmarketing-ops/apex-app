@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,16 +8,55 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { type, prompt, aspect_ratio } = await request.json();
+    const { type, prompt, aspect_ratio, model } = await request.json();
 
     if (type === 'image') {
-      const apiKey = process.env.GOOGLE_AI_API_KEY;
+      const googleKey = process.env.GOOGLE_AI_API_KEY;
+      const openaiKey = process.env.OPENAI_API_KEY;
 
-      // Try Imagen 3 first if API key exists
-      if (apiKey) {
+      // Model selection: dalle3 (best for text/commercial), imagen (best for photos), pollinations (free fallback)
+      const selectedModel = model || (openaiKey ? 'dalle3' : googleKey ? 'imagen' : 'pollinations');
+
+      // DALL-E 3 — best for ad creatives with text overlays
+      if (selectedModel === 'dalle3' && openaiKey) {
+        try {
+          const openai = new OpenAI({ apiKey: openaiKey });
+          const size = aspect_ratio === '9:16' ? '1024x1792' as const : aspect_ratio === '16:9' ? '1792x1024' as const : '1024x1024' as const;
+
+          const response = await openai.images.generate({
+            model: 'dall-e-3',
+            prompt: `Professional paid advertising creative: ${prompt}. High quality commercial photography style, clean composition, bold visuals, suitable for Meta/Google/TikTok ads. No watermarks.`,
+            n: 1,
+            size,
+            quality: 'hd',
+            style: 'vivid',
+          });
+
+          const imageUrl = response.data?.[0]?.url;
+          if (imageUrl) {
+            // Fetch and convert to base64
+            const imgRes = await fetch(imageUrl);
+            const buffer = await imgRes.arrayBuffer();
+            const base64 = Buffer.from(buffer).toString('base64');
+
+            return NextResponse.json({
+              type: 'image',
+              image: `data:image/png;base64,${base64}`,
+              prompt,
+              model: 'DALL-E 3',
+            });
+          }
+        } catch (e: any) {
+          console.error('DALL-E 3 error:', e.message);
+          // Fall through to next model
+        }
+      }
+
+      // Imagen 3 — best for photorealistic product/lifestyle shots
+      if ((selectedModel === 'imagen' || selectedModel === 'dalle3') && googleKey) {
         try {
           const imagenRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${googleKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -34,37 +74,65 @@ export async function POST(request: NextRequest) {
               type: 'image',
               image: `data:image/png;base64,${imagenData.predictions[0].bytesBase64Encoded}`,
               prompt,
+              model: 'Imagen 3',
             });
           }
         } catch {}
       }
 
-      // Fallback: Pollinations AI (free, no API key needed)
+      // Gemini with image generation
+      if (googleKey) {
+        try {
+          const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${googleKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: `Generate a professional ad creative image: ${prompt}. High quality, bold visuals.` }] }],
+                generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+              }),
+            }
+          );
+          const geminiData = await geminiRes.json();
+          if (!geminiData.error) {
+            const parts = geminiData.candidates?.[0]?.content?.parts || [];
+            const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image'));
+            if (imagePart) {
+              return NextResponse.json({
+                type: 'image',
+                image: `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`,
+                prompt,
+                model: 'Gemini',
+              });
+            }
+          }
+        } catch {}
+      }
+
+      // Pollinations — free fallback, no key needed
       try {
         const encodedPrompt = encodeURIComponent(
-          `Professional ad creative for paid advertising: ${prompt}. High quality, clean composition, bold visuals, commercial photography style, suitable for Meta/Google/TikTok ads`
+          `Professional ad creative for paid advertising: ${prompt}. High quality, clean composition, commercial photography style`
         );
         const width = aspect_ratio === '9:16' ? 720 : aspect_ratio === '16:9' ? 1280 : aspect_ratio === '4:5' ? 800 : 1024;
         const height = aspect_ratio === '9:16' ? 1280 : aspect_ratio === '16:9' ? 720 : aspect_ratio === '4:5' ? 1000 : 1024;
 
         const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Date.now()}`;
-
-        // Fetch the image and convert to base64
         const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(30000) });
         if (imgRes.ok) {
           const buffer = await imgRes.arrayBuffer();
           const base64 = Buffer.from(buffer).toString('base64');
-          const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-
           return NextResponse.json({
             type: 'image',
-            image: `data:${contentType};base64,${base64}`,
+            image: `data:image/jpeg;base64,${base64}`,
             prompt,
+            model: 'Pollinations',
           });
         }
       } catch {}
 
-      return NextResponse.json({ error: 'Image generation failed. Please try again.' }, { status: 500 });
+      return NextResponse.json({ error: 'All image generation methods failed. Please try again.' }, { status: 500 });
 
     } else if (type === 'video') {
       const apiKey = process.env.HIGGSFIELD_API_KEY;
