@@ -40,9 +40,16 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: planData.priceId, quantity: 1 }],
-      success_url: `${appUrl}/dashboard?billing=success`,
-      cancel_url: `${appUrl}/dashboard?billing=cancelled`,
+      success_url: `${appUrl}/dashboard/billing?billing=success`,
+      cancel_url: `${appUrl}/dashboard/billing?billing=cancelled`,
+      subscription_data: {
+        trial_period_days: 14,
+        metadata: { user_id: user.id, plan },
+      },
+      payment_method_collection: 'if_required',
       metadata: { user_id: user.id, plan },
+    }, {
+      idempotencyKey: `checkout_${user.id}_${plan}_${Date.now()}`,
     });
 
     return NextResponse.json({ url: session.url });
