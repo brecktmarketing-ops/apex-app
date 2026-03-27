@@ -10,6 +10,24 @@ export interface MetaCampaign {
   lifetime_budget?: string;
 }
 
+export interface MetaAdSet {
+  id: string;
+  name: string;
+  status: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  targeting?: Record<string, unknown>;
+  optimization_goal?: string;
+  billing_event?: string;
+}
+
+export interface MetaAd {
+  id: string;
+  name: string;
+  status: string;
+  creative?: Record<string, unknown>;
+}
+
 export interface MetaInsights {
   campaign_id: string;
   spend: number;
@@ -21,6 +39,8 @@ export interface MetaInsights {
   cost_per_action_type?: { action_type: string; value: string }[];
   purchase_roas?: { action_type: string; value: string }[];
 }
+
+const INSIGHT_FIELDS = 'spend,impressions,clicks,ctr,cpm,reach,frequency,cost_per_unique_click,cpp,actions,cost_per_action_type,purchase_roas';
 
 export async function getMetaAdAccounts(token: string): Promise<{ id: string; name: string; account_status: number }[]> {
   const res = await fetch(`${META_BASE}/me/adaccounts?fields=id,name,account_status&access_token=${token}`);
@@ -39,6 +59,24 @@ export async function getMetaCampaigns(accountId: string, token: string): Promis
   return data.data || [];
 }
 
+export async function getMetaAdSets(accountId: string, token: string, campaignId: string): Promise<MetaAdSet[]> {
+  const res = await fetch(
+    `${META_BASE}/${campaignId}/adsets?fields=id,name,status,daily_budget,lifetime_budget,targeting,optimization_goal,billing_event&limit=50&access_token=${token}`
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data || [];
+}
+
+export async function getMetaAds(accountId: string, token: string, adsetId: string): Promise<MetaAd[]> {
+  const res = await fetch(
+    `${META_BASE}/${adsetId}/ads?fields=id,name,status,creative{id,name,object_type,title,body,thumbnail_url}&limit=50&access_token=${token}`
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data || [];
+}
+
 export async function getMetaCampaignInsights(
   accountId: string,
   token: string,
@@ -46,7 +84,7 @@ export async function getMetaCampaignInsights(
 ): Promise<any[]> {
   const id = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
   const res = await fetch(
-    `${META_BASE}/${id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,ctr,cpm,reach,frequency,cost_per_unique_click,cpp,actions,cost_per_action_type,purchase_roas&level=campaign&date_preset=${datePreset}&limit=50&access_token=${token}`
+    `${META_BASE}/${id}/insights?fields=campaign_id,campaign_name,${INSIGHT_FIELDS}&level=campaign&date_preset=${datePreset}&limit=50&access_token=${token}`
   );
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -61,7 +99,35 @@ export async function getMetaCampaignInsightsRange(
 ): Promise<any[]> {
   const id = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
   const res = await fetch(
-    `${META_BASE}/${id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,ctr,cpm,reach,frequency,cost_per_unique_click,cpp,actions,cost_per_action_type,purchase_roas&level=campaign&time_range={"since":"${since}","until":"${until}"}&limit=50&access_token=${token}`
+    `${META_BASE}/${id}/insights?fields=campaign_id,campaign_name,${INSIGHT_FIELDS}&level=campaign&time_range={"since":"${since}","until":"${until}"}&limit=50&access_token=${token}`
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data || [];
+}
+
+export async function getMetaAdSetInsights(
+  accountId: string,
+  token: string,
+  adsetId: string,
+  datePreset: string = 'last_30d'
+): Promise<any[]> {
+  const res = await fetch(
+    `${META_BASE}/${adsetId}/insights?fields=${INSIGHT_FIELDS}&date_preset=${datePreset}&limit=1&access_token=${token}`
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data || [];
+}
+
+export async function getMetaAdInsights(
+  accountId: string,
+  token: string,
+  adId: string,
+  datePreset: string = 'last_30d'
+): Promise<any[]> {
+  const res = await fetch(
+    `${META_BASE}/${adId}/insights?fields=${INSIGHT_FIELDS}&date_preset=${datePreset}&limit=1&access_token=${token}`
   );
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -75,7 +141,7 @@ export async function getMetaDailyInsights(
 ): Promise<any[]> {
   const id = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
   const res = await fetch(
-    `${META_BASE}/${id}/insights?fields=campaign_id,spend,impressions,clicks,actions&level=campaign&date_preset=${datePreset}&time_increment=1&limit=500&access_token=${token}`
+    `${META_BASE}/${id}/insights?fields=campaign_id,${INSIGHT_FIELDS.split(',').slice(0, 4).join(',')},actions&level=campaign&date_preset=${datePreset}&time_increment=1&limit=500&access_token=${token}`
   );
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);

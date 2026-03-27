@@ -13,77 +13,74 @@ export async function POST(request: NextRequest) {
       const apiKey = process.env.GOOGLE_AI_API_KEY;
       if (!apiKey) return NextResponse.json({ error: 'Google AI API key not configured' }, { status: 500 });
 
-      // Use Imagen 3 for image generation
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            instances: [{
-              prompt: `Professional ad creative: ${prompt}. High quality, suitable for paid advertising on Meta/Google/TikTok. Clean composition, bold visuals, commercial photography style.`
-            }],
-            parameters: {
-              sampleCount: 1,
-              aspectRatio: aspect_ratio || '1:1',
-            }
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.error) {
-        // Fallback to Gemini 2.0 Flash with correct config
-        const fallbackRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      // Try Imagen 3 first (dedicated image generation model)
+      try {
+        const imagenRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: `Generate an ad creative image: ${prompt}. Make it high quality, professional, suitable for paid advertising. Clean composition, bold visuals.`
-                }]
+              instances: [{
+                prompt: `Professional ad creative: ${prompt}. High quality, suitable for paid advertising. Clean composition, bold visuals, commercial photography style.`
               }],
-              generationConfig: {
-                responseModalities: ['IMAGE', 'TEXT'],
+              parameters: {
+                sampleCount: 1,
+                aspectRatio: aspect_ratio || '1:1',
               }
             }),
           }
         );
 
-        const fallbackData = await fallbackRes.json();
+        const imagenData = await imagenRes.json();
 
-        if (fallbackData.error) {
-          return NextResponse.json({ error: fallbackData.error.message || 'Image generation failed' }, { status: 500 });
-        }
-
-        const parts = fallbackData.candidates?.[0]?.content?.parts || [];
-        const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image'));
-
-        if (imagePart) {
+        if (!imagenData.error && imagenData.predictions?.[0]?.bytesBase64Encoded) {
           return NextResponse.json({
             type: 'image',
-            image: `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`,
+            image: `data:image/png;base64,${imagenData.predictions[0].bytesBase64Encoded}`,
             prompt,
           });
         }
+      } catch {}
 
-        return NextResponse.json({ error: 'No image generated. Try a different prompt.' }, { status: 500 });
-      }
+      // Fallback: Try Gemini 2.0 Flash with image generation
+      try {
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: `Generate a professional ad creative image: ${prompt}. High quality, bold visuals, clean composition.` }]
+              }],
+              generationConfig: {
+                responseModalities: ['TEXT', 'IMAGE'],
+              }
+            }),
+          }
+        );
 
-      // Imagen 3 response
-      const predictions = data.predictions || [];
-      if (predictions.length > 0 && predictions[0].bytesBase64Encoded) {
-        return NextResponse.json({
-          type: 'image',
-          image: `data:image/png;base64,${predictions[0].bytesBase64Encoded}`,
-          prompt,
-        });
-      }
+        const geminiData = await geminiRes.json();
 
-      return NextResponse.json({ error: 'No image generated. Try a different prompt.' }, { status: 500 });
+        if (!geminiData.error) {
+          const parts = geminiData.candidates?.[0]?.content?.parts || [];
+          const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image'));
+
+          if (imagePart) {
+            return NextResponse.json({
+              type: 'image',
+              image: `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`,
+              prompt,
+            });
+          }
+        }
+      } catch {}
+
+      // Last fallback: Use standard Gemini to describe an image prompt, then tell user
+      return NextResponse.json({
+        error: 'Image generation is not available with your current API key. You need a Google AI API key with Imagen access enabled. Go to console.cloud.google.com to enable the Imagen API.',
+      }, { status: 500 });
 
     } else if (type === 'video') {
       const apiKey = process.env.HIGGSFIELD_API_KEY;
@@ -106,7 +103,7 @@ export async function POST(request: NextRequest) {
       const data = await res.json();
 
       if (data.status === 'failed' || data.error) {
-        return NextResponse.json({ error: data.error || 'Higgsfield generation failed' }, { status: 500 });
+        return NextResponse.json({ error: data.error || 'Video generation failed' }, { status: 500 });
       }
 
       return NextResponse.json({
@@ -129,7 +126,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Check Higgsfield video status
 export async function GET(request: NextRequest) {
   const requestId = request.nextUrl.searchParams.get('request_id');
   if (!requestId) return NextResponse.json({ error: 'request_id required' }, { status: 400 });

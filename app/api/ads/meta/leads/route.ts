@@ -25,13 +25,20 @@ export async function GET() {
     const rawAccountId = connection.account_id;
     const accountId = rawAccountId?.startsWith('act_') ? rawAccountId : `act_${rawAccountId}`;
 
-    // Get all lead forms for this ad account
+    // Get all lead forms for this ad account (requires leads_retrieval permission)
     const formsRes = await fetch(
-      `${META_API}/${accountId}/leadgen_forms?fields=id,name,status&access_token=${token}`
+      `${META_API}/${accountId}/leadgen_forms?fields=id,name,status,leads_count&access_token=${token}`
     );
     const formsData = await formsRes.json();
 
     if (formsData.error) {
+      // If leads_retrieval permission missing, try getting leads from ads directly
+      if (formsData.error.code === 100 || formsData.error.message?.includes('permission')) {
+        return NextResponse.json({
+          error: 'Missing leads_retrieval permission. In your Meta App settings, go to App Review > Permissions and request "leads_retrieval" access.',
+          needsPermission: true
+        }, { status: 403 });
+      }
       return NextResponse.json({ error: formsData.error.message }, { status: 500 });
     }
 
@@ -39,9 +46,9 @@ export async function GET() {
     let totalNewLeads = 0;
 
     for (const form of forms) {
-      // Get leads from each form
+      // Get leads from each form (requires leads_retrieval permission on the page)
       const leadsRes = await fetch(
-        `${META_API}/${form.id}/leads?fields=id,created_time,field_data,ad_id,ad_name,campaign_id,campaign_name&limit=100&access_token=${token}`
+        `${META_API}/${form.id}/leads?fields=id,created_time,field_data,ad_id,ad_name,campaign_id,campaign_name&limit=500&access_token=${token}`
       );
       const leadsData = await leadsRes.json();
 

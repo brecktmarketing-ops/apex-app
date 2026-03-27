@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { Campaign } from '@/lib/types';
 
@@ -38,6 +38,26 @@ interface ColumnDef {
   rating?: (val: number) => 'good' | 'mid' | 'bad' | null;
   defaultVisible: boolean;
   width: string;
+}
+
+// Generic row data for ad sets and ads (same metric shape as Campaign)
+interface DrillRow {
+  id: string;
+  name: string;
+  status: string;
+  spend: number;
+  revenue: number;
+  leads: number;
+  roas: number;
+  cpl: number;
+  ctr: number;
+  impressions: number;
+  clicks: number;
+  cpm: number;
+  hook_rate: number | null;
+  platform_data: Record<string, unknown>;
+  // extra drill-down fields
+  meta_label?: string; // targeting summary, creative type, etc
 }
 
 const COLUMNS: ColumnDef[] = [
@@ -164,6 +184,94 @@ function ratingStyle(rating: 'good' | 'mid' | 'bad' | null): React.CSSProperties
   return { ...map[rating], padding: '2px 8px', borderRadius: 6, display: 'inline-block' };
 }
 
+// Helper to parse insights into a DrillRow-compatible metric shape
+function insightToMetrics(row: any) {
+  const purchases = row.actions?.find((a: any) => a.action_type === 'purchase')?.value || '0';
+  const leads = row.actions?.find((a: any) => a.action_type === 'lead')?.value || '0';
+  const roas = row.purchase_roas?.find((a: any) => a.action_type === 'omni_purchase')?.value || '0';
+  const cpl = row.cost_per_action_type?.find((a: any) => a.action_type === 'lead')?.value || '0';
+  const spendVal = parseFloat(row.spend || '0');
+  const clicksVal = parseInt(row.clicks || '0');
+
+  return {
+    spend: spendVal,
+    impressions: parseInt(row.impressions || '0'),
+    clicks: clicksVal,
+    ctr: parseFloat(row.ctr || '0'),
+    cpm: parseFloat(row.cpm || '0'),
+    cpc: clicksVal > 0 ? spendVal / clicksVal : 0,
+    reach: parseInt(row.reach || '0'),
+    frequency: parseFloat(row.frequency || '0'),
+    cpp: parseFloat(row.cpp || '0'),
+    cost_per_unique_click: parseFloat(row.cost_per_unique_click || '0'),
+    purchases: parseInt(purchases),
+    leads: parseInt(leads),
+    roas: parseFloat(roas),
+    cpl: parseFloat(cpl),
+    revenue: spendVal * parseFloat(roas),
+  };
+}
+
+// Build a fake Campaign-shaped object so COLUMNS format/getValue/rating work
+function makeCampaignLike(id: string, name: string, status: string, metrics: ReturnType<typeof insightToMetrics>, extra: Record<string, unknown> = {}): Campaign & { meta_label?: string } {
+  return {
+    id,
+    user_id: '',
+    connection_id: '',
+    platform: 'meta',
+    platform_campaign_id: id,
+    name,
+    status: status === 'ACTIVE' ? 'active' : status === 'PAUSED' ? 'paused' : 'killed',
+    spend: metrics.spend,
+    revenue: metrics.revenue,
+    leads: metrics.leads,
+    roas: metrics.roas,
+    cpl: metrics.cpl,
+    ctr: metrics.ctr,
+    impressions: metrics.impressions,
+    clicks: metrics.clicks,
+    cpm: metrics.cpm,
+    hook_rate: null,
+    platform_data: {
+      purchases: metrics.purchases,
+      reach: metrics.reach,
+      frequency: metrics.frequency,
+      cpc: metrics.cpc,
+      cpp: metrics.cpp,
+      cost_per_unique_click: metrics.cost_per_unique_click,
+      ...extra,
+    },
+    date_range_start: null,
+    date_range_end: null,
+    synced_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    meta_label: extra.meta_label as string | undefined,
+  } as Campaign & { meta_label?: string };
+}
+
+// Chevron SVG component
+function Chevron({ expanded, size = 14 }: { expanded: boolean; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        transition: 'transform 0.2s ease',
+        transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+        flexShrink: 0,
+      }}
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
 export default function MetaPage() {
   const supabase = createClient();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -182,6 +290,14 @@ export default function MetaPage() {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getInitialColumns);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Drill-down state
+  const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set());
+  const [expandedAdSets, setExpandedAdSets] = useState<Set<string>>(new Set());
+  const [adSetsByCampaign, setAdSetsByCampaign] = useState<Record<string, (Campaign & { meta_label?: string })[]>>({});
+  const [adsByAdSet, setAdsByAdSet] = useState<Record<string, (Campaign & { meta_label?: string })[]>>({});
+  const [loadingAdSets, setLoadingAdSets] = useState<Set<string>>(new Set());
+  const [loadingAds, setLoadingAds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function load() {
@@ -227,6 +343,11 @@ export default function MetaPage() {
         setCampaigns(metaCampaigns);
         setLastSync(data.synced_at);
         setSyncMsg(`Synced ${metaCampaigns.length} Meta campaigns`);
+        // Clear drill-down cache on new sync
+        setAdSetsByCampaign({});
+        setAdsByAdSet({});
+        setExpandedCampaigns(new Set());
+        setExpandedAdSets(new Set());
       }
     } catch (e: any) {
       setSyncMsg('Sync failed: ' + e.message);
@@ -250,6 +371,128 @@ export default function MetaPage() {
     }
   }
 
+  // Fetch ad sets for a campaign
+  const fetchAdSets = useCallback(async (campaignPlatformId: string) => {
+    if (adSetsByCampaign[campaignPlatformId]) return; // already cached
+    setLoadingAdSets(prev => new Set(prev).add(campaignPlatformId));
+    try {
+      const dp = customStart && customEnd ? '' : (datePreset || 'last_30d');
+      const dateParams = customStart && customEnd
+        ? `&since=${customStart}&until=${customEnd}`
+        : `&date_preset=${dp}`;
+      const res = await fetch(`/api/ads/meta/drilldown?level=adsets&parent_id=${campaignPlatformId}${dateParams}`);
+      const data = await res.json();
+      if (data.error) {
+        console.error('Failed to fetch ad sets:', data.error);
+      } else {
+        const rows = (data.items || []).map((item: any) => {
+          const metrics = item.insights ? insightToMetrics(item.insights) : insightToMetrics({});
+          const targeting = item.targeting;
+          let targetingSummary = '';
+          if (targeting) {
+            const parts: string[] = [];
+            if (targeting.age_min || targeting.age_max) parts.push(`${targeting.age_min || '?'}-${targeting.age_max || '?'}`);
+            if (targeting.genders?.length) parts.push(targeting.genders.map((g: number) => g === 1 ? 'M' : g === 2 ? 'F' : 'All').join('/'));
+            if (targeting.geo_locations?.countries?.length) parts.push(targeting.geo_locations.countries.join(', '));
+            if (targeting.flexible_spec?.length) {
+              const interests = targeting.flexible_spec.flatMap((s: any) => s.interests?.map((i: any) => i.name) || []);
+              if (interests.length) parts.push(interests.slice(0, 3).join(', ') + (interests.length > 3 ? '...' : ''));
+            }
+            targetingSummary = parts.join(' | ') || 'Broad';
+          }
+          const optGoal = (item.optimization_goal || '').replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase());
+          return makeCampaignLike(item.id, item.name, item.status, metrics, {
+            daily_budget: item.daily_budget,
+            lifetime_budget: item.lifetime_budget,
+            optimization_goal: optGoal,
+            targeting_summary: targetingSummary,
+            meta_label: [targetingSummary, optGoal].filter(Boolean).join(' -- '),
+          });
+        });
+        setAdSetsByCampaign(prev => ({ ...prev, [campaignPlatformId]: rows }));
+      }
+    } catch (err) {
+      console.error('Error fetching ad sets:', err);
+    }
+    setLoadingAdSets(prev => { const n = new Set(prev); n.delete(campaignPlatformId); return n; });
+  }, [adSetsByCampaign, datePreset, customStart, customEnd]);
+
+  // Fetch ads for an ad set
+  const fetchAds = useCallback(async (adsetId: string) => {
+    if (adsByAdSet[adsetId]) return;
+    setLoadingAds(prev => new Set(prev).add(adsetId));
+    try {
+      const dp = customStart && customEnd ? '' : (datePreset || 'last_30d');
+      const dateParams = customStart && customEnd
+        ? `&since=${customStart}&until=${customEnd}`
+        : `&date_preset=${dp}`;
+      const res = await fetch(`/api/ads/meta/drilldown?level=ads&parent_id=${adsetId}${dateParams}`);
+      const data = await res.json();
+      if (data.error) {
+        console.error('Failed to fetch ads:', data.error);
+      } else {
+        const rows = (data.items || []).map((item: any) => {
+          const metrics = item.insights ? insightToMetrics(item.insights) : insightToMetrics({});
+          const creative = item.creative;
+          let creativeLabel = '';
+          if (creative) {
+            const parts: string[] = [];
+            if (creative.name) parts.push(creative.name);
+            if (creative.object_type) parts.push(creative.object_type.replace(/_/g, ' '));
+            if (creative.title) parts.push(`"${creative.title}"`);
+            creativeLabel = parts.join(' -- ') || 'Unknown Creative';
+          }
+          return makeCampaignLike(item.id, item.name, item.status, metrics, {
+            creative_name: creative?.name || '',
+            creative_type: creative?.object_type || '',
+            meta_label: creativeLabel,
+          });
+        });
+        setAdsByAdSet(prev => ({ ...prev, [adsetId]: rows }));
+      }
+    } catch (err) {
+      console.error('Error fetching ads:', err);
+    }
+    setLoadingAds(prev => { const n = new Set(prev); n.delete(adsetId); return n; });
+  }, [adsByAdSet, datePreset, customStart, customEnd]);
+
+  function toggleExpandCampaign(platformCampaignId: string) {
+    setExpandedCampaigns(prev => {
+      const n = new Set(prev);
+      if (n.has(platformCampaignId)) {
+        n.delete(platformCampaignId);
+      } else {
+        n.add(platformCampaignId);
+        fetchAdSets(platformCampaignId);
+      }
+      return n;
+    });
+  }
+
+  function toggleExpandAdSet(adsetId: string) {
+    setExpandedAdSets(prev => {
+      const n = new Set(prev);
+      if (n.has(adsetId)) {
+        n.delete(adsetId);
+      } else {
+        n.add(adsetId);
+        fetchAds(adsetId);
+      }
+      return n;
+    });
+  }
+
+  function expandAll() {
+    const campaignIds = campaigns.map(c => c.platform_campaign_id);
+    setExpandedCampaigns(new Set(campaignIds));
+    campaignIds.forEach(id => fetchAdSets(id));
+  }
+
+  function collapseAll() {
+    setExpandedCampaigns(new Set());
+    setExpandedAdSets(new Set());
+  }
+
   const activeColumns = COLUMNS.filter(col => visibleColumns.includes(col.key));
   const gridTemplate = `44px 2fr ${activeColumns.map(c => c.width).join(' ')} 80px`;
 
@@ -265,8 +508,129 @@ export default function MetaPage() {
     { label: 'Leads', value: `${totalLeads}` },
   ];
 
+  // Row renderer for any level
+  function renderMetricRow(
+    item: Campaign & { meta_label?: string },
+    level: 'campaign' | 'adset' | 'ad',
+    isExpanded: boolean,
+    onToggleExpand?: () => void,
+    onToggleStatus?: () => void,
+  ) {
+    const indent = level === 'campaign' ? 0 : level === 'adset' ? 28 : 56;
+    const bgMap = {
+      campaign: 'transparent',
+      adset: 'rgba(var(--accent-rgb, 16,185,129), 0.02)',
+      ad: 'rgba(var(--accent-rgb, 16,185,129), 0.04)',
+    };
+    const canExpand = level !== 'ad';
+
+    return (
+      <div
+        key={item.id}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: gridTemplate,
+          padding: `10px 16px 10px ${16 + indent}px`,
+          alignItems: 'center',
+          borderBottom: '1px solid var(--border)',
+          cursor: canExpand ? 'pointer' : 'default',
+          transition: 'background 0.15s',
+          background: bgMap[level],
+          overflowX: 'auto',
+        }}
+        onClick={canExpand ? onToggleExpand : undefined}
+        onMouseEnter={e => { if (canExpand) (e.currentTarget as HTMLDivElement).style.background = 'var(--card2)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = bgMap[level]; }}
+      >
+        {/* Toggle (campaign only) / Chevron */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {level === 'campaign' && onToggleStatus ? (
+            <div
+              onClick={e => { e.stopPropagation(); onToggleStatus(); }}
+              style={{
+                width: 38, height: 22, borderRadius: 11, cursor: 'pointer', position: 'relative', transition: 'all 0.2s',
+                background: item.status === 'active' ? 'var(--green-dim)' : 'var(--red-dim)',
+                border: item.status === 'active' ? '1px solid rgba(22,163,74,0.3)' : '1px solid rgba(220,38,38,0.2)',
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', transition: 'all 0.2s',
+                background: item.status === 'active' ? 'var(--green)' : 'var(--red)',
+                ...(item.status === 'active' ? { right: 3 } : { left: 3 }),
+              }} />
+            </div>
+          ) : canExpand ? (
+            <span style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
+              <Chevron expanded={isExpanded} size={12} />
+            </span>
+          ) : (
+            <span style={{ width: 12 }} />
+          )}
+        </div>
+
+        {/* Name + label */}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {level === 'campaign' && (
+              <span style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
+                <Chevron expanded={isExpanded} />
+              </span>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: level === 'campaign' ? 600 : 500, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {item.name}
+              </div>
+              {item.meta_label && (
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.meta_label}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Columns */}
+        {activeColumns.map(col => {
+          const val = col.getValue(item);
+          const rating = col.rating ? col.rating(val) : null;
+          return (
+            <div key={col.key} style={{ fontSize: 13 }} onClick={e => e.stopPropagation()}>
+              <span style={ratingStyle(rating)}>{col.format(item)}</span>
+            </div>
+          );
+        })}
+
+        {/* Status Badge */}
+        <div onClick={e => e.stopPropagation()}>
+          <span style={{
+            fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6,
+            color: item.status === 'active' ? 'var(--green)' : item.status === 'killed' ? 'var(--red)' : 'var(--muted)',
+            background: item.status === 'active' ? 'var(--green-dim)' : item.status === 'killed' ? 'var(--red-dim)' : 'var(--card2)',
+            textTransform: 'capitalize',
+          }}>{item.status}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading row spinner
+  function renderLoadingRow(indent: number) {
+    return (
+      <div style={{ padding: `10px 16px 10px ${16 + indent}px`, borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{
+          width: 14, height: 14, border: '2px solid var(--border2)', borderTopColor: 'var(--accent)',
+          borderRadius: '50%', animation: 'spin 0.6s linear infinite',
+        }} />
+        <span style={{ fontSize: 12, color: 'var(--muted)' }}>Loading...</span>
+      </div>
+    );
+  }
+
   return (
     <div>
+      {/* Spin animation */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -277,6 +641,34 @@ export default function MetaPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {syncMsg && <span style={{ fontSize: 12, color: syncMsg.includes('Synced') ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>{syncMsg}</span>}
+
+          {/* Expand/Collapse All */}
+          {campaigns.length > 0 && (
+            <>
+              <button
+                onClick={expandAll}
+                style={{
+                  padding: '7px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--muted)',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+                Expand All
+              </button>
+              <button
+                onClick={collapseAll}
+                style={{
+                  padding: '7px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--muted)',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+                Collapse All
+              </button>
+            </>
+          )}
 
           {/* Column Picker */}
           <div ref={pickerRef} style={{ position: 'relative' }}>
@@ -474,7 +866,7 @@ export default function MetaPage() {
         </div>
       )}
 
-      {/* Campaign Table */}
+      {/* Campaign Table with Drill-Down */}
       {campaigns.length > 0 && (
         <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
           {/* Header */}
@@ -487,52 +879,71 @@ export default function MetaPage() {
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: 0.6 }}>Status</div>
           </div>
 
-          {/* Rows */}
-          {campaigns.map(c => (
-            <div key={c.id} style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '12px 16px', alignItems: 'center', borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'background 0.15s', overflowX: 'auto' }}>
-              {/* Toggle */}
-              <div
-                onClick={() => toggleCampaign(c.id, c.status)}
-                style={{
-                  width: 38, height: 22, borderRadius: 11, cursor: 'pointer', position: 'relative', transition: 'all 0.2s',
-                  background: c.status === 'active' ? 'var(--green-dim)' : 'var(--red-dim)',
-                  border: c.status === 'active' ? '1px solid rgba(22,163,74,0.3)' : '1px solid rgba(220,38,38,0.2)',
-                }}
-              >
-                <div style={{
-                  position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', transition: 'all 0.2s',
-                  background: c.status === 'active' ? 'var(--green)' : 'var(--red)',
-                  ...(c.status === 'active' ? { right: 3 } : { left: 3 }),
-                }} />
-              </div>
+          {/* Rows - Campaign > Ad Set > Ad */}
+          {campaigns.map(c => {
+            const campExpanded = expandedCampaigns.has(c.platform_campaign_id);
+            const adSets = adSetsByCampaign[c.platform_campaign_id] || [];
+            const isLoadingAdSets = loadingAdSets.has(c.platform_campaign_id);
 
-              {/* Campaign Name */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>
-              </div>
+            return (
+              <div key={c.id}>
+                {/* Campaign Row */}
+                {renderMetricRow(
+                  { ...c, meta_label: undefined } as Campaign & { meta_label?: string },
+                  'campaign',
+                  campExpanded,
+                  () => toggleExpandCampaign(c.platform_campaign_id),
+                  () => toggleCampaign(c.id, c.status),
+                )}
 
-              {/* Dynamic Columns */}
-              {activeColumns.map(col => {
-                const val = col.getValue(c);
-                const rating = col.rating ? col.rating(val) : null;
-                return (
-                  <div key={col.key} style={{ fontSize: 13 }}>
-                    <span style={ratingStyle(rating)}>{col.format(c)}</span>
+                {/* Ad Sets */}
+                {campExpanded && (
+                  <div style={{ overflow: 'hidden' }}>
+                    {isLoadingAdSets && adSets.length === 0 && renderLoadingRow(28)}
+                    {adSets.map(adset => {
+                      const adsetExpanded = expandedAdSets.has(adset.id);
+                      const ads = adsByAdSet[adset.id] || [];
+                      const isLoadingTheseAds = loadingAds.has(adset.id);
+
+                      return (
+                        <div key={adset.id}>
+                          {/* Ad Set Row */}
+                          {renderMetricRow(
+                            adset,
+                            'adset',
+                            adsetExpanded,
+                            () => toggleExpandAdSet(adset.id),
+                          )}
+
+                          {/* Ads */}
+                          {adsetExpanded && (
+                            <div style={{ overflow: 'hidden' }}>
+                              {isLoadingTheseAds && ads.length === 0 && renderLoadingRow(56)}
+                              {ads.map(ad => (
+                                <div key={ad.id}>
+                                  {renderMetricRow(ad, 'ad', false)}
+                                </div>
+                              ))}
+                              {!isLoadingTheseAds && ads.length === 0 && (
+                                <div style={{ padding: '8px 16px 8px 72px', fontSize: 12, color: 'var(--dim)', borderBottom: '1px solid var(--border)' }}>
+                                  No ads found in this ad set
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {!isLoadingAdSets && adSets.length === 0 && (
+                      <div style={{ padding: '8px 16px 8px 44px', fontSize: 12, color: 'var(--dim)', borderBottom: '1px solid var(--border)' }}>
+                        No ad sets found in this campaign
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-
-              {/* Status Badge */}
-              <div>
-                <span style={{
-                  fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6,
-                  color: c.status === 'active' ? 'var(--green)' : c.status === 'killed' ? 'var(--red)' : 'var(--muted)',
-                  background: c.status === 'active' ? 'var(--green-dim)' : c.status === 'killed' ? 'var(--red-dim)' : 'var(--card2)',
-                  textTransform: 'capitalize',
-                }}>{c.status}</span>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
