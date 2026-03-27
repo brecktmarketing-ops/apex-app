@@ -215,6 +215,11 @@ export default function DashboardPage() {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(getSavedWidths);
   const [resizing, setResizing] = useState<string | null>(null);
   const presetRef = useRef<HTMLDivElement>(null);
+  const [expandedCampaigns, setExpandedCampaigns] = useState<Record<string, boolean>>({});
+  const [adSets, setAdSets] = useState<Record<string, any[]>>({});
+  const [expandedAdSets, setExpandedAdSets] = useState<Record<string, boolean>>({});
+  const [ads, setAds] = useState<Record<string, any[]>>({});
+  const [loadingDrilldown, setLoadingDrilldown] = useState<Record<string, boolean>>({});
   const [showLauncher, setShowLauncher] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchForm, setLaunchForm] = useState({ name: '', objective: 'OUTCOME_LEADS', daily_budget: '50', targeting_age_min: '25', targeting_age_max: '55', targeting_genders: 'all', targeting_interests: '', geo: 'US', headline: '', body: '', link: '', cta: 'LEARN_MORE' });
@@ -338,6 +343,67 @@ export default function DashboardPage() {
     }
   }
 
+  async function toggleCampaignExpand(campaignId: string, platformCampaignId: string) {
+    const isExpanded = expandedCampaigns[campaignId];
+    setExpandedCampaigns(prev => ({ ...prev, [campaignId]: !isExpanded }));
+    if (!isExpanded && !adSets[campaignId]) {
+      setLoadingDrilldown(prev => ({ ...prev, [campaignId]: true }));
+      try {
+        const res = await fetch(`/api/ads/meta/drilldown?level=adsets&parent_id=${platformCampaignId}&date_preset=${datePreset || 'last_30d'}`);
+        const data = await res.json();
+        if (data.entities) {
+          const merged = data.entities.map((e: any) => {
+            const insight = data.insights?.find((i: any) => i.id === e.id) || {};
+            return { ...e, ...insight };
+          });
+          setAdSets(prev => ({ ...prev, [campaignId]: merged }));
+        }
+      } catch (err) {
+        console.error('Failed to load ad sets', err);
+      }
+      setLoadingDrilldown(prev => ({ ...prev, [campaignId]: false }));
+    }
+  }
+
+  async function toggleAdSetExpand(adsetId: string) {
+    const isExpanded = expandedAdSets[adsetId];
+    setExpandedAdSets(prev => ({ ...prev, [adsetId]: !isExpanded }));
+    if (!isExpanded && !ads[adsetId]) {
+      setLoadingDrilldown(prev => ({ ...prev, [adsetId]: true }));
+      try {
+        const res = await fetch(`/api/ads/meta/drilldown?level=ads&parent_id=${adsetId}&date_preset=${datePreset || 'last_30d'}`);
+        const data = await res.json();
+        if (data.entities) {
+          const merged = data.entities.map((e: any) => {
+            const insight = data.insights?.find((i: any) => i.id === e.id) || {};
+            return { ...e, ...insight };
+          });
+          setAds(prev => ({ ...prev, [adsetId]: merged }));
+        }
+      } catch (err) {
+        console.error('Failed to load ads', err);
+      }
+      setLoadingDrilldown(prev => ({ ...prev, [adsetId]: false }));
+    }
+  }
+
+  function expandAllCampaigns() {
+    const metaCampaigns = campaigns.filter(c => c.platform === 'meta');
+    const newExpanded: Record<string, boolean> = {};
+    metaCampaigns.forEach(c => { newExpanded[c.id] = true; });
+    setExpandedCampaigns(newExpanded);
+    metaCampaigns.forEach(c => {
+      if (!adSets[c.id]) {
+        toggleCampaignExpand(c.id, (c as any).platform_campaign_id || c.id);
+      }
+    });
+  }
+
+  function collapseAllCampaigns() {
+    setExpandedCampaigns({});
+    setExpandedAdSets({});
+  }
+
   const activeColumns = COLUMNS.filter(col => visibleColumns.includes(col.key));
   const gridTemplate = `44px 2fr ${activeColumns.map(c => columnWidths[c.key] ? `${columnWidths[c.key]}px` : c.width).join(' ')} 80px`;
 
@@ -368,6 +434,26 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {syncMsg && <span style={{ fontSize: 12, color: syncMsg.includes('Synced') || syncMsg.includes('created') ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>{syncMsg}</span>}
+
+          {/* Expand / Collapse All */}
+          {campaigns.some(c => c.platform === 'meta') && (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button
+                onClick={expandAllCampaigns}
+                style={{
+                  padding: '7px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--muted)',
+                }}
+              >Expand All</button>
+              <button
+                onClick={collapseAllCampaigns}
+                style={{
+                  padding: '7px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--muted)',
+                }}
+              >Collapse All</button>
+            </div>
+          )}
 
           {/* Column Picker */}
           <div ref={pickerRef} style={{ position: 'relative' }}>
@@ -724,52 +810,177 @@ export default function DashboardPage() {
           </div>
 
           {/* Rows */}
-          {campaigns.map(c => (
-            <div key={c.id} style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '12px 16px', alignItems: 'center', borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'background 0.15s', overflowX: 'auto' }}>
-              {/* Toggle */}
-              <div
-                onClick={() => toggleCampaignOnMeta(c.id, c.status)}
-                style={{
-                  width: 38, height: 22, borderRadius: 11, cursor: 'pointer', position: 'relative', transition: 'all 0.2s',
-                  background: c.status === 'active' ? 'var(--green-dim)' : 'var(--red-dim)',
-                  border: c.status === 'active' ? '1px solid rgba(22,163,74,0.3)' : '1px solid rgba(220,38,38,0.2)',
-                }}
-              >
-                <div style={{
-                  position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', transition: 'all 0.2s',
-                  background: c.status === 'active' ? 'var(--green)' : 'var(--red)',
-                  ...(c.status === 'active' ? { right: 3 } : { left: 3 }),
-                }} />
-              </div>
-
-              {/* Campaign Name */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 1, textTransform: 'capitalize' }}>{c.platform}</div>
-              </div>
-
-              {/* Dynamic Columns */}
-              {activeColumns.map(col => {
-                const val = col.getValue(c);
-                const rating = col.rating ? col.rating(val) : null;
-                return (
-                  <div key={col.key} style={{ fontSize: 13 }}>
-                    <span style={ratingStyle(rating)}>{col.format(c)}</span>
+          {campaigns.map(c => {
+            const isMeta = c.platform === 'meta';
+            const isExpanded = expandedCampaigns[c.id];
+            return (
+              <div key={c.id}>
+                {/* Campaign Row */}
+                <div style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '12px 16px', alignItems: 'center', borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'background 0.15s', overflowX: 'auto' }}>
+                  {/* Toggle */}
+                  <div
+                    onClick={() => toggleCampaignOnMeta(c.id, c.status)}
+                    style={{
+                      width: 38, height: 22, borderRadius: 11, cursor: 'pointer', position: 'relative', transition: 'all 0.2s',
+                      background: c.status === 'active' ? 'var(--green-dim)' : 'var(--red-dim)',
+                      border: c.status === 'active' ? '1px solid rgba(22,163,74,0.3)' : '1px solid rgba(220,38,38,0.2)',
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute', top: 3, width: 14, height: 14, borderRadius: '50%', transition: 'all 0.2s',
+                      background: c.status === 'active' ? 'var(--green)' : 'var(--red)',
+                      ...(c.status === 'active' ? { right: 3 } : { left: 3 }),
+                    }} />
                   </div>
-                );
-              })}
 
-              {/* Status Badge */}
-              <div>
-                <span style={{
-                  fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6,
-                  color: c.status === 'active' ? 'var(--green)' : c.status === 'killed' ? 'var(--red)' : 'var(--muted)',
-                  background: c.status === 'active' ? 'var(--green-dim)' : c.status === 'killed' ? 'var(--red-dim)' : 'var(--card2)',
-                  textTransform: 'capitalize',
-                }}>{c.status}</span>
+                  {/* Campaign Name + Chevron */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {isMeta && (
+                      <span
+                        onClick={(e) => { e.stopPropagation(); toggleCampaignExpand(c.id, (c as any).platform_campaign_id || c.id); }}
+                        style={{ fontSize: 14, color: 'var(--muted)', cursor: 'pointer', transition: 'transform 0.2s', display: 'inline-block', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', flexShrink: 0, width: 16, textAlign: 'center' }}
+                      >{'\u25B8'}</span>
+                    )}
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 1, textTransform: 'capitalize' }}>{c.platform}</div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Columns */}
+                  {activeColumns.map(col => {
+                    const val = col.getValue(c);
+                    const rating = col.rating ? col.rating(val) : null;
+                    return (
+                      <div key={col.key} style={{ fontSize: 13 }}>
+                        <span style={ratingStyle(rating)}>{col.format(c)}</span>
+                      </div>
+                    );
+                  })}
+
+                  {/* Status Badge */}
+                  <div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6,
+                      color: c.status === 'active' ? 'var(--green)' : c.status === 'killed' ? 'var(--red)' : 'var(--muted)',
+                      background: c.status === 'active' ? 'var(--green-dim)' : c.status === 'killed' ? 'var(--red-dim)' : 'var(--card2)',
+                      textTransform: 'capitalize',
+                    }}>{c.status}</span>
+                  </div>
+                </div>
+
+                {/* Ad Set Rows (drilldown level 1) */}
+                {isExpanded && (
+                  <div>
+                    {loadingDrilldown[c.id] && (
+                      <div style={{ padding: '10px 16px 10px 60px', fontSize: 12, color: 'var(--muted)', background: 'var(--card2)', borderBottom: '1px solid var(--border)' }}>Loading ad sets...</div>
+                    )}
+                    {(adSets[c.id] || []).map((adset: any) => {
+                      const adsetExpanded = expandedAdSets[adset.id];
+                      return (
+                        <div key={adset.id}>
+                          {/* Ad Set Row */}
+                          <div style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '10px 16px', alignItems: 'center', borderBottom: '1px solid var(--border)', background: 'var(--card2)', transition: 'background 0.15s', overflowX: 'auto' }}>
+                            {/* Empty toggle column */}
+                            <div />
+                            {/* Ad Set Name + Chevron */}
+                            <div style={{ paddingLeft: 28, display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span
+                                onClick={() => toggleAdSetExpand(adset.id)}
+                                style={{ fontSize: 13, color: 'var(--muted)', cursor: 'pointer', transition: 'transform 0.2s', display: 'inline-block', transform: adsetExpanded ? 'rotate(90deg)' : 'rotate(0deg)', flexShrink: 0, width: 16, textAlign: 'center' }}
+                              >{'\u25B8'}</span>
+                              <div>
+                                <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{adset.name}</div>
+                                <div style={{ fontSize: 10, color: 'var(--dim)', marginTop: 1 }}>Ad Set</div>
+                              </div>
+                            </div>
+                            {/* Metrics */}
+                            {activeColumns.map(col => {
+                              const raw = adset[col.key] ?? adset[col.key === 'revenue' ? 'purchase_value' : ''] ?? 0;
+                              const numVal = Number(raw) || 0;
+                              const display = col.key === 'spend' || col.key === 'revenue' || col.key === 'cpm' || col.key === 'cpc' || col.key === 'cpl'
+                                ? `$${numVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                : col.key === 'roas'
+                                  ? `${numVal.toFixed(2)}x`
+                                  : col.key === 'ctr' || col.key === 'hook_rate'
+                                    ? `${numVal.toFixed(2)}%`
+                                    : col.key === 'frequency'
+                                      ? numVal.toFixed(2)
+                                      : numVal.toLocaleString();
+                              const rating = col.rating ? col.rating(numVal) : null;
+                              return (
+                                <div key={col.key} style={{ fontSize: 12 }}>
+                                  <span style={ratingStyle(rating)}>{display}</span>
+                                </div>
+                              );
+                            })}
+                            {/* Status */}
+                            <div>
+                              <span style={{
+                                fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 5,
+                                color: adset.status === 'ACTIVE' || adset.effective_status === 'ACTIVE' ? 'var(--green)' : 'var(--muted)',
+                                background: adset.status === 'ACTIVE' || adset.effective_status === 'ACTIVE' ? 'var(--green-dim)' : 'var(--card)',
+                                textTransform: 'capitalize',
+                              }}>{(adset.effective_status || adset.status || '').toLowerCase()}</span>
+                            </div>
+                          </div>
+
+                          {/* Ad Rows (drilldown level 2) */}
+                          {adsetExpanded && (
+                            <div>
+                              {loadingDrilldown[adset.id] && (
+                                <div style={{ padding: '10px 16px 10px 88px', fontSize: 12, color: 'var(--muted)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>Loading ads...</div>
+                              )}
+                              {(ads[adset.id] || []).map((ad: any) => (
+                                <div key={ad.id} style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '9px 16px', alignItems: 'center', borderBottom: '1px solid var(--border)', background: 'var(--bg)', transition: 'background 0.15s', overflowX: 'auto' }}>
+                                  {/* Empty toggle column */}
+                                  <div />
+                                  {/* Ad Name */}
+                                  <div style={{ paddingLeft: 56 }}>
+                                    <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{ad.name}</div>
+                                    <div style={{ fontSize: 10, color: 'var(--dim)', marginTop: 1 }}>Ad{ad.creative?.object_type ? ` \u00B7 ${ad.creative.object_type}` : ''}</div>
+                                  </div>
+                                  {/* Metrics */}
+                                  {activeColumns.map(col => {
+                                    const raw = ad[col.key] ?? ad[col.key === 'revenue' ? 'purchase_value' : ''] ?? 0;
+                                    const numVal = Number(raw) || 0;
+                                    const display = col.key === 'spend' || col.key === 'revenue' || col.key === 'cpm' || col.key === 'cpc' || col.key === 'cpl'
+                                      ? `$${numVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                      : col.key === 'roas'
+                                        ? `${numVal.toFixed(2)}x`
+                                        : col.key === 'ctr' || col.key === 'hook_rate'
+                                          ? `${numVal.toFixed(2)}%`
+                                          : col.key === 'frequency'
+                                            ? numVal.toFixed(2)
+                                            : numVal.toLocaleString();
+                                    const rating = col.rating ? col.rating(numVal) : null;
+                                    return (
+                                      <div key={col.key} style={{ fontSize: 12 }}>
+                                        <span style={ratingStyle(rating)}>{display}</span>
+                                      </div>
+                                    );
+                                  })}
+                                  {/* Status */}
+                                  <div>
+                                    <span style={{
+                                      fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 5,
+                                      color: ad.status === 'ACTIVE' || ad.effective_status === 'ACTIVE' ? 'var(--green)' : 'var(--muted)',
+                                      background: ad.status === 'ACTIVE' || ad.effective_status === 'ACTIVE' ? 'var(--green-dim)' : 'var(--card)',
+                                      textTransform: 'capitalize',
+                                    }}>{(ad.effective_status || ad.status || '').toLowerCase()}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
