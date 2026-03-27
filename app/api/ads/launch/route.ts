@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     if (!connection) return NextResponse.json({ error: 'No Meta account connected' }, { status: 404 });
 
     const token = connection.access_token;
-    const accountId = connection.account_id;
+    const rawAccountId = connection.account_id;
+    const accountId = rawAccountId?.startsWith('act_') ? rawAccountId : `act_${rawAccountId}`;
 
     // Step 1: Create Campaign
     const campRes = await fetch(`${META_API}/${accountId}/campaigns`, {

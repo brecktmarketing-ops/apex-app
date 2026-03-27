@@ -439,6 +439,33 @@ export default function PipelinePage() {
             CRM Synced
           </span>
           <button
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/ads/meta/leads');
+                const data = await res.json();
+                if (data.newLeads > 0) {
+                  alert(`Synced ${data.newLeads} new leads from Meta!`);
+                  loadLeads();
+                } else {
+                  alert(data.error || 'No new leads found');
+                }
+              } catch { alert('Failed to sync leads'); }
+            }}
+            style={{
+              padding: '6px 16px',
+              background: 'var(--card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            Sync Meta Leads
+          </button>
+          <button
             onClick={() => setShowAdd(!showAdd)}
             style={{
               padding: '6px 16px',

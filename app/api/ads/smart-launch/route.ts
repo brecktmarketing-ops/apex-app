@@ -87,7 +87,8 @@ Pick the BEST campaign type for their specific business and goal. Write copy tha
 
     const strategy = JSON.parse(jsonMatch[0]);
     const token = connection.access_token;
-    const accountId = connection.account_id;
+    const rawAccountId = connection.account_id;
+    const accountId = rawAccountId?.startsWith('act_') ? rawAccountId : `act_${rawAccountId}`;
 
     // Step 2: Create Campaign on Meta
     const campRes = await fetch(`${META_API}/${accountId}/campaigns`, {
