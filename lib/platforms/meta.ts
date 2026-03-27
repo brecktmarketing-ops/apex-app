@@ -53,6 +53,21 @@ export async function getMetaCampaignInsights(
   return data.data || [];
 }
 
+export async function getMetaCampaignInsightsRange(
+  accountId: string,
+  token: string,
+  since: string,
+  until: string
+): Promise<any[]> {
+  const id = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+  const res = await fetch(
+    `${META_BASE}/${id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,ctr,cpm,reach,frequency,cost_per_unique_click,cpp,actions,cost_per_action_type,purchase_roas&level=campaign&time_range={"since":"${since}","until":"${until}"}&limit=50&access_token=${token}`
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data || [];
+}
+
 export async function getMetaDailyInsights(
   accountId: string,
   token: string,

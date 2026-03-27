@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getMetaCampaigns, getMetaCampaignInsights, parseMetaInsights, toggleMetaCampaign } from '@/lib/platforms/meta';
+import { getMetaCampaigns, getMetaCampaignInsights, getMetaCampaignInsightsRange, parseMetaInsights, toggleMetaCampaign } from '@/lib/platforms/meta';
 
 // GET - Sync Meta campaigns for logged-in user
 export async function GET(request: NextRequest) {
@@ -33,7 +33,11 @@ export async function GET(request: NextRequest) {
 
     // Pull insights
     const datePreset = request.nextUrl.searchParams.get('date_preset') || 'last_30d';
-    const rawInsights = await getMetaCampaignInsights(accountId, token, datePreset);
+    const sinceParam = request.nextUrl.searchParams.get('since');
+    const untilParam = request.nextUrl.searchParams.get('until');
+    const rawInsights = sinceParam && untilParam
+      ? await getMetaCampaignInsightsRange(accountId, token, sinceParam, untilParam)
+      : await getMetaCampaignInsights(accountId, token, datePreset);
     const insights = parseMetaInsights(rawInsights);
 
     // Upsert campaigns into database

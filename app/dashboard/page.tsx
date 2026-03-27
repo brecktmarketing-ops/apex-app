@@ -15,6 +15,20 @@ const DATE_PRESETS = [
   { label: 'Last 90d', value: 'last_90d' },
 ];
 
+function formatDate(d: Date): string {
+  return d.toISOString().split('T')[0];
+}
+
+function getDaysInMonth(year: number, month: number): number {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number): number {
+  return new Date(year, month, 1).getDay();
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 // --- Column definitions with performance thresholds ---
 interface ColumnDef {
   key: string;
@@ -158,6 +172,13 @@ export default function DashboardPage() {
   const [syncMsg, setSyncMsg] = useState('');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [datePreset, setDatePreset] = useState('last_30d');
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [pickingStart, setPickingStart] = useState(true);
+  const calRef = useRef<HTMLDivElement>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getInitialColumns);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
@@ -176,16 +197,15 @@ export default function DashboardPage() {
     load();
   }, []);
 
-  // Close column picker on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-        setShowColumnPicker(false);
-      }
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setShowColumnPicker(false);
+      if (calRef.current && !calRef.current.contains(e.target as Node)) setShowCalendar(false);
     }
-    if (showColumnPicker) document.addEventListener('mousedown', handleClick);
+    if (showColumnPicker || showCalendar) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [showColumnPicker]);
+  }, [showColumnPicker, showCalendar]);
 
   function toggleColumn(key: string) {
     setVisibleColumns(prev => {
@@ -195,11 +215,14 @@ export default function DashboardPage() {
     });
   }
 
-  async function syncMeta(preset?: string) {
+  async function syncMeta(preset?: string, since?: string, until?: string) {
     setSyncing(true);
     setSyncMsg('');
     try {
-      const res = await fetch(`/api/ads/meta?date_preset=${preset || datePreset}`);
+      const params = since && until
+        ? `since=${since}&until=${until}`
+        : `date_preset=${preset || datePreset}`;
+      const res = await fetch(`/api/ads/meta?${params}`);
       const data = await res.json();
       if (data.error) {
         setSyncMsg(data.error);
@@ -313,16 +336,115 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Date Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, overflowX: 'auto' }}>
+      {/* Date Picker Row */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Preset Buttons */}
         {DATE_PRESETS.map(d => (
-          <button key={d.value} onClick={() => { setDatePreset(d.value); syncMeta(d.value); }} style={{
-            padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: datePreset === d.value ? 700 : 500,
+          <button key={d.value} onClick={() => { setDatePreset(d.value); setCustomStart(''); setCustomEnd(''); syncMeta(d.value); }} style={{
+            padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: datePreset === d.value && !customStart ? 700 : 500,
             cursor: 'pointer', fontFamily: 'inherit', border: 'none', whiteSpace: 'nowrap',
-            background: datePreset === d.value ? 'var(--accent-dim)' : 'var(--card)',
-            color: datePreset === d.value ? 'var(--accent)' : 'var(--muted)',
+            background: datePreset === d.value && !customStart ? 'var(--accent-dim)' : 'var(--card)',
+            color: datePreset === d.value && !customStart ? 'var(--accent)' : 'var(--muted)',
           }}>{d.label}</button>
         ))}
+
+        {/* Custom Date Picker */}
+        <div ref={calRef} style={{ position: 'relative', marginLeft: 4 }}>
+          <button
+            onClick={() => { setShowCalendar(!showCalendar); setPickingStart(true); }}
+            style={{
+              padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: customStart ? 700 : 500,
+              cursor: 'pointer', fontFamily: 'inherit', border: 'none', whiteSpace: 'nowrap',
+              background: customStart ? 'var(--accent-dim)' : 'var(--card)',
+              color: customStart ? 'var(--accent)' : 'var(--muted)',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {customStart && customEnd ? `${customStart} — ${customEnd}` : 'Custom'}
+          </button>
+
+          {showCalendar && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, marginTop: 6, zIndex: 50,
+              background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
+              boxShadow: 'var(--shadow-lg)', padding: 16, width: 280,
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', marginBottom: 10 }}>
+                {pickingStart ? 'Select start date' : 'Select end date'}
+              </div>
+
+              {/* Month nav */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(calMonth - 1); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 16, fontFamily: 'inherit', padding: '4px 8px' }}>&#8249;</button>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{MONTH_NAMES[calMonth]} {calYear}</span>
+                <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(calMonth + 1); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 16, fontFamily: 'inherit', padding: '4px 8px' }}>&#8250;</button>
+              </div>
+
+              {/* Day headers */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                  <div key={d} style={{ fontSize: 10, fontWeight: 600, color: 'var(--dim)', textAlign: 'center', padding: 4 }}>{d}</div>
+                ))}
+              </div>
+
+              {/* Days grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+                {Array.from({ length: getFirstDayOfMonth(calYear, calMonth) }).map((_, i) => (
+                  <div key={`e${i}`} />
+                ))}
+                {Array.from({ length: getDaysInMonth(calYear, calMonth) }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = formatDate(new Date(calYear, calMonth, day));
+                  const isStart = dateStr === customStart;
+                  const isEnd = dateStr === customEnd;
+                  const inRange = customStart && customEnd && dateStr >= customStart && dateStr <= customEnd;
+                  const isToday = dateStr === formatDate(new Date());
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => {
+                        if (pickingStart) {
+                          setCustomStart(dateStr);
+                          setCustomEnd('');
+                          setDatePreset('');
+                          setPickingStart(false);
+                        } else {
+                          const endDate = dateStr < customStart ? customStart : dateStr;
+                          const startDate = dateStr < customStart ? dateStr : customStart;
+                          setCustomStart(startDate);
+                          setCustomEnd(endDate);
+                          setDatePreset('');
+                          setShowCalendar(false);
+                          syncMeta(undefined, startDate, endDate);
+                        }
+                      }}
+                      style={{
+                        width: '100%', aspectRatio: '1', border: 'none', borderRadius: 8, cursor: 'pointer',
+                        fontFamily: 'inherit', fontSize: 12, fontWeight: isStart || isEnd ? 700 : 500,
+                        background: isStart || isEnd ? 'var(--accent)' : inRange ? 'var(--accent-dim)' : 'transparent',
+                        color: isStart || isEnd ? '#fff' : inRange ? 'var(--accent)' : isToday ? 'var(--accent)' : 'var(--text)',
+                        transition: 'all 0.1s',
+                      }}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick clear */}
+              {customStart && (
+                <button onClick={() => { setCustomStart(''); setCustomEnd(''); setDatePreset('last_30d'); setShowCalendar(false); syncMeta('last_30d'); }}
+                  style={{ marginTop: 10, width: '100%', padding: '8px 0', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Clear custom dates
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Smart Campaign Launcher */}

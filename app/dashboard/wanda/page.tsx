@@ -89,8 +89,25 @@ export default function WandaPage() {
             </div>
           </div>
         ))}
-        {streaming && messages[messages.length - 1]?.content === '' && (
-          <div style={{ fontSize: 12, color: 'var(--muted)', padding: '0 38px' }}>Wanda is thinking...</div>
+        {streaming && (
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+              background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 700, fontSize: 11, color: '#fff',
+            }}>W</div>
+            <div style={{
+              background: 'var(--card2)', border: '1px solid var(--border)',
+              borderRadius: '0 12px 12px 12px', padding: '14px 18px',
+            }}>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'wandaDot 1.4s ease-in-out infinite' }} />
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'wandaDot 1.4s ease-in-out 0.2s infinite' }} />
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'wandaDot 1.4s ease-in-out 0.4s infinite' }} />
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
