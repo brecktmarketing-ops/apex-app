@@ -18,6 +18,7 @@ const navItems = [
   { label: 'Automation', path: '/dashboard/automation', icon: '↻' },
   { label: 'Pipeline', path: '/dashboard/pipeline', icon: '⊞' },
   { label: 'Data Tracker', path: '/dashboard/tracker', icon: '⊛' },
+  { label: 'Billing', path: '/dashboard/billing', icon: '◇' },
   { label: 'Settings', path: '/dashboard/settings', icon: '⊕' },
 ];
 
