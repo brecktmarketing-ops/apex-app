@@ -139,11 +139,17 @@ export async function POST(request: NextRequest) {
       const apiSecret = process.env.HIGGSFIELD_API_SECRET;
       if (!apiKey || !apiSecret) return NextResponse.json({ error: 'Higgsfield API keys not configured' }, { status: 500 });
 
+      const cleanKey = apiKey.trim();
+      const cleanSecret = apiSecret.trim();
       const res = await fetch('https://platform.higgsfield.ai/higgsfield-ai/soul/standard', {
         method: 'POST',
         headers: {
-          'Authorization': `Key ${apiKey}:${apiSecret}`,
+          'Authorization': `Key ${cleanKey}:${cleanSecret}`,
           'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+          'Origin': 'https://higgsfield.ai',
+          'Referer': 'https://higgsfield.ai/',
         },
         body: JSON.stringify({
           prompt: `Cinematic ad video: ${prompt}. Professional quality, dynamic motion, clean transitions.`,
@@ -185,7 +191,13 @@ export async function GET(request: NextRequest) {
   const apiSecret = process.env.HIGGSFIELD_API_SECRET;
 
   const res = await fetch(`https://platform.higgsfield.ai/requests/${requestId}/status`, {
-    headers: { 'Authorization': `Key ${apiKey}:${apiSecret}` },
+    headers: {
+      'Authorization': `Key ${apiKey?.trim()}:${apiSecret?.trim()}`,
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+      'Origin': 'https://higgsfield.ai',
+      'Referer': 'https://higgsfield.ai/',
+    },
   });
 
   const data = await res.json();
