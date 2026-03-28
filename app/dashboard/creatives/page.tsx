@@ -120,7 +120,7 @@ BODY COPY:
       const data = await res.json();
       if (data.error) { alert('Video generation failed: ' + data.error); }
       else {
-        setVideoJobs(prev => [{ id: data.request_id, status: data.status, prompt: data.prompt, videoUrl: data.video, images: data.images }, ...prev]);
+        setVideoJobs(prev => [{ id: data.request_id, status: data.status, prompt: data.prompt, videoUrl: data.video?.url || data.video || null, images: data.images }, ...prev]);
         // Poll for completion
         if (data.status !== 'completed') pollVideo(data.request_id);
       }
@@ -133,7 +133,7 @@ BODY COPY:
       try {
         const res = await fetch(`/api/creatives/generate?request_id=${requestId}`);
         const data = await res.json();
-        setVideoJobs(prev => prev.map(j => j.id === requestId ? { ...j, status: data.status, videoUrl: data.video?.url, images: data.images } : j));
+        setVideoJobs(prev => prev.map(j => j.id === requestId ? { ...j, status: data.status, videoUrl: data.video?.url || data.video || data.result?.url || null, images: data.images } : j));
         if (data.status === 'completed' || data.status === 'failed' || data.status === 'nsfw') clearInterval(interval);
       } catch { clearInterval(interval); }
     }, 5000);
@@ -323,7 +323,7 @@ BODY COPY:
                     </div>
                     {job.videoUrl && (
                       <div>
-                        <video src={job.videoUrl} controls style={{ width: '100%', borderRadius: 10, marginBottom: 8 }} />
+                        <video src={job.videoUrl} controls playsInline crossOrigin="anonymous" style={{ width: '100%', borderRadius: 10, marginBottom: 8 }} />
                         <a href={job.videoUrl} download style={{ display: 'block', padding: '8px 0', background: 'var(--accent-dim)', border: '1px solid var(--accent-glow)', borderRadius: 8, fontSize: 12, fontWeight: 700, color: 'var(--accent)', textAlign: 'center', textDecoration: 'none' }}>Download Video</a>
                       </div>
                     )}
