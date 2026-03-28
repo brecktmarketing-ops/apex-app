@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>APEX — Smarter Ads. Every Platform. Zero Guesswork.</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ─── DESIGN TOKENS (LIGHT MODE DEFAULT) ─── */
+:root{
+  --bg:#f0f1f5;
+  --bg-alt:#ffffff;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --card2:#fafaf8;
+  --border:rgba(0,0,0,0.06);
+  --border2:rgba(0,0,0,0.08);
+  --green:#10b981;
+  --green2:#34d399;
+  --green-dim:rgba(16,185,129,0.06);
+  --green-glow:rgba(16,185,129,0.08);
+  --text:#1a1a1a;
+  --muted:#666666;
+  --dim:#999999;
+  --glow-1:rgba(16,185,129,0.03);
+  --glow-2:rgba(80,60,200,0.02);
+  --card-radius:20px;
+  --float-shadow:0 8px 32px rgba(0,0,0,0.08);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(16,185,129,0.2);border-radius:3px}
+
+/* ─── PARTICLE CANVAS ─── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ─── THEME TOGGLE ─── */
+.theme-toggle{
+  width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);
+  background:#fff;backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all 0.3s;color:#666;font-size:16px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.theme-toggle:hover{border-color:rgba(0,0,0,0.15);color:#1a1a1a;background:#fff}
+
+/* ─── DARK MODE ─── */
+html.dark{
+  --bg:#06080e;
+  --bg-alt:#0a0c14;
+  --surface:#0a0c14;
+  --card:#0c0e1a;
+  --card2:#10121e;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --green:#34d399;
+  --green2:#6ee7b7;
+  --green-dim:rgba(52,211,153,0.06);
+  --green-glow:rgba(52,211,153,0.12);
+  --text:#f0f0f5;
+  --muted:rgba(255,255,255,0.5);
+  --dim:rgba(255,255,255,0.28);
+  --glow-1:rgba(52,211,153,0.08);
+  --glow-2:rgba(80,60,200,0.06);
+  --float-shadow:0 8px 32px rgba(0,0,0,0.35);
+}
+
+/* Nav dark */
+html.dark nav.scrolled{background:rgba(6,6,18,0.85);box-shadow:none}
+html.dark .btn-ghost{color:rgba(255,255,255,0.5)}
+html.dark .btn-ghost:hover{color:#f0f0f5}
+html.dark .logo-mark{color:#060612;box-shadow:0 0 20px rgba(52,211,153,0.25)}
+html.dark .logo-name{color:#f0f0f5}
+html.dark .nav-mid a{color:rgba(255,255,255,0.5)}
+html.dark .nav-mid a:hover{color:#f0f0f5}
+
+/* Hero dark */
+html.dark .hero{background:var(--bg)}
+html.dark .hero-title-gradient{background:linear-gradient(180deg,#ffffff 0%,rgba(255,255,255,0.5) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dark h1{color:#f0f0f5;letter-spacing:-4px}
+html.dark .shimmer-text{
+  background:linear-gradient(90deg,var(--green) 0%,var(--green2) 30%,#ffffff 50%,var(--green2) 70%,var(--green) 100%);
+  background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+html.dark .hero-sub{color:rgba(255,255,255,0.5)}
+html.dark .hero-badge{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.2)}
+html.dark .hero-badge-dot{background:var(--green2)}
+html.dark .hero-note{color:rgba(255,255,255,0.28)}
+
+/* Floating hero elements dark */
+html.dark .hero-float-el{
+  background:#0e0e22;border-color:rgba(255,255,255,0.06);
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  color:#f0f0f5;
+}
+html.dark .hero-float-el .hf-label{color:rgba(255,255,255,0.5)}
+html.dark .hero-float-el .hf-value{color:#f0f0f5}
+
+/* Buttons dark */
+html.dark .btn-hero{
+  background:linear-gradient(135deg,var(--green),var(--green2));color:#060612;
+  box-shadow:0 0 30px rgba(52,211,153,0.2);
+}
+html.dark .btn-hero:hover{box-shadow:0 12px 40px rgba(52,211,153,0.35);transform:translateY(-2px)}
+html.dark .btn-cta{background:linear-gradient(135deg,var(--green),var(--green2));color:#060612}
+html.dark .btn-cta:hover{box-shadow:0 8px 30px rgba(52,211,153,0.35)}
+html.dark .btn-hero-outline{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:#f0f0f5}
+html.dark .btn-hero-outline:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2)}
+
+/* Cards dark */
+html.dark .oss-card,html.dark .hiw-step,html.dark .why-card,html.dark .testi-card,html.dark .faq-item,html.dark .cost-col{
+  background:#0e0e22;border:1px solid rgba(255,255,255,0.06);
+  box-shadow:none;
+}
+html.dark .oss-card:hover,html.dark .hiw-step:hover,html.dark .why-card:hover,html.dark .testi-card:hover{
+  box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 40px rgba(52,211,153,0.06);
+  border-color:rgba(52,211,153,0.15);transform:translateY(-6px) !important;
+}
+
+/* Pricing dark */
+html.dark .p-card{
+  background:#0e0e22;border:1px solid rgba(255,255,255,0.06);border-radius:24px;
+  box-shadow:none;
+}
+html.dark .p-card:hover{box-shadow:0 20px 60px rgba(0,0,0,0.4);transform:translateY(-6px);border-color:rgba(255,255,255,0.12)}
+html.dark .p-card.hot{border-color:rgba(52,211,153,0.25);background:linear-gradient(160deg,rgba(52,211,153,0.06) 0%,#0e0e22 50%)}
+html.dark .p-card.hot:hover{box-shadow:0 20px 60px rgba(52,211,153,0.1),0 0 40px rgba(52,211,153,0.05)}
+html.dark .p-badge{background:linear-gradient(135deg,var(--green),var(--green2));color:#060612;box-shadow:0 0 20px rgba(52,211,153,0.3)}
+html.dark .p-btn.solid{background:linear-gradient(135deg,var(--green),var(--green2));color:#060612;box-shadow:0 0 20px rgba(52,211,153,0.15)}
+html.dark .p-btn.solid:hover{box-shadow:0 8px 30px rgba(52,211,153,0.3)}
+html.dark .p-btn.line{border-color:rgba(255,255,255,0.1)}
+html.dark .p-btn.line:hover{background:#121230;border-color:rgba(255,255,255,0.15)}
+html.dark .p-dollar{color:rgba(255,255,255,0.5)}
+html.dark .p-num{color:#f0f0f5}
+html.dark .p-num.g{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dark .p-per{color:rgba(255,255,255,0.28)}
+html.dark .p-tier{color:rgba(255,255,255,0.5)}
+html.dark .p-feats li{color:rgba(255,255,255,0.5)}
+html.dark .p-feats li::before{color:var(--green)}
+html.dark .p-desc{color:rgba(255,255,255,0.5)}
+html.dark .p-divider{background:rgba(255,255,255,0.06)}
+
+/* Sections dark */
+html.dark .hiw-bg{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+html.dark .pricing-bg{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+html.dark .comp-bg{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+html.dark .ticker-wrap{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+html.dark .t-item{color:rgba(255,255,255,0.5)}
+html.dark .t-sep{color:var(--green);opacity:0.35}
+html.dark footer{border-top:1px solid rgba(255,255,255,0.06)}
+html.dark .foot-by{color:rgba(255,255,255,0.28)}
+html.dark .foot-links a{color:rgba(255,255,255,0.28)}
+html.dark .foot-links a:hover{color:rgba(255,255,255,0.5)}
+html.dark .foot-copy{color:rgba(255,255,255,0.28)}
+
+/* Stats dark */
+html.dark .stats{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+html.dark .stat{border-right:1px solid rgba(255,255,255,0.06)}
+html.dark .stat-n{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dark .stat-l{color:rgba(255,255,255,0.5)}
+
+/* Section headings dark */
+html.dark .eyebrow{color:var(--green)}
+html.dark .sec-h{color:#f0f0f5}
+html.dark .sec-p{color:rgba(255,255,255,0.5)}
+
+/* Icons dark */
+html.dark .oss-icon,html.dark .why-icon{
+  background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15);box-shadow:0 0 20px rgba(52,211,153,0.08);
+}
+html.dark .oss-num{color:var(--green)}
+html.dark .oss-card h3,html.dark .hiw-step h3,html.dark .why-card h3{color:#f0f0f5}
+html.dark .oss-card p,html.dark .hiw-step p,html.dark .why-card p{color:rgba(255,255,255,0.5)}
+html.dark .step-n{color:rgba(52,211,153,0.08)}
+
+/* Why tags dark */
+html.dark .why-tag{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15);color:var(--green)}
+html.dark .why-tag.red{color:#6ee7b7;background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.15)}
+
+/* Testimonials dark */
+html.dark .testi-quote{color:#f0f0f5}
+html.dark .testi-quote em{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dark .testi-name{color:#f0f0f5}
+html.dark .testi-role{color:rgba(255,255,255,0.5)}
+html.dark .testi-avatar,html.dark .testi-card-avatar{color:#060612}
+html.dark .testi-card-text{color:rgba(255,255,255,0.5)}
+html.dark .testi-card-text em{color:#f0f0f5}
+html.dark .testi-card-name{color:#f0f0f5}
+html.dark .testi-card-role{color:rgba(255,255,255,0.5)}
+html.dark .testi-card-stars{color:var(--green)}
+
+/* Cost comparison dark */
+html.dark .cost-bg{background:var(--bg)}
+html.dark .cost-col.old{border-color:rgba(248,113,113,0.2)}
+html.dark .cost-col.old::before{background:#34d399}
+html.dark .cost-col.new{border-color:rgba(52,211,153,0.25);background:linear-gradient(160deg,rgba(52,211,153,0.05) 0%,#0e0e22 50%)}
+html.dark .cost-col.new::before{background:linear-gradient(135deg,var(--green),var(--green2));color:#060612;box-shadow:0 0 15px rgba(52,211,153,0.2)}
+html.dark .cost-label{color:rgba(255,255,255,0.5)}
+html.dark .cost-price{color:#f0f0f5}
+html.dark .cost-price.red{color:#6ee7b7}
+html.dark .cost-total-label{color:#f0f0f5}
+html.dark .cost-total-price.red{color:#6ee7b7}
+html.dark .cost-total-price.green{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html.dark .cost-savings{background:rgba(52,211,153,0.05);border-color:rgba(52,211,153,0.12)}
+html.dark .cost-savings-n{color:var(--green)}
+html.dark .cost-savings-l{color:rgba(255,255,255,0.5)}
+html.dark .cost-item{border-bottom-color:rgba(255,255,255,0.06)}
+html.dark .cost-total{border-top-color:rgba(255,255,255,0.1)}
+
+/* FAQ dark */
+html.dark .faq-q{color:#f0f0f5}
+html.dark .faq-arrow{color:rgba(255,255,255,0.5)}
+html.dark .faq-item.open .faq-arrow{color:var(--green)}
+html.dark .faq-a{color:rgba(255,255,255,0.5)}
+html.dark .faq-item:hover{border-color:rgba(255,255,255,0.1);background:#121230}
+
+/* Guarantee dark */
+html.dark .guarantee-icon{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15);box-shadow:0 0 30px rgba(52,211,153,0.1)}
+html.dark .guarantee h3{color:#f0f0f5}
+html.dark .guarantee p{color:rgba(255,255,255,0.5)}
+
+/* Final CTA dark */
+html.dark .fcta h2{color:#f0f0f5}
+html.dark .fcta p{color:rgba(255,255,255,0.5)}
+html.dark .fcta-glow{opacity:1}
+html.dark .fcta-trust{color:rgba(255,255,255,0.28)}
+html.dark .pricing-note{color:rgba(255,255,255,0.28)}
+html.dark .pricing-note span{color:var(--green)}
+
+/* Toggle dark */
+html.dark .theme-toggle{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);box-shadow:none}
+html.dark .theme-toggle:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#f0f0f5}
+
+/* Ambient dark */
+html.dark .ambient-orb{opacity:0.35}
+html.dark .up{color:#34d399}
+html.dark .down{color:#6ee7b7}
+
+/* Platform logos dark */
+html.dark .platform-logo{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06)}
+html.dark .platform-logo:hover{border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.06)}
+html.dark .platform-logo span{color:rgba(255,255,255,0.5)}
+
+/* More testimonials section dark */
+html.dark .testi-section-bg{background:#0a0a1a !important;border-top:1px solid rgba(255,255,255,0.06) !important;border-bottom:1px solid rgba(255,255,255,0.06) !important}
+
+/* DB inline colors */
+html.dark .db-kpi-val{color:#f0f0f5}
+html.dark .db-kpi-label{color:rgba(255,255,255,0.5)}
+html.dark .db-cname{color:#f0f0f5}
+html.dark .foot-name{color:#f0f0f5}
+
+/* Trust bar dark */
+html.dark .trust-bar{border-color:rgba(255,255,255,0.06)}
+html.dark .trust-text{color:rgba(255,255,255,0.5)}
+html.dark .trust-logo{color:rgba(255,255,255,0.28)}
+
+/* Hero spotlight dark */
+html.dark .hero-spotlight{opacity:0.6}
+html.dark .hero-glow{background:radial-gradient(ellipse,rgba(52,211,153,0.1) 0%,rgba(80,60,200,0.04) 40%,transparent 70%)}
+
+/* Why section dark */
+html.dark .why-section-bg{background:#0a0a1a;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+
+/* Scrollbar dark */
+html.dark::-webkit-scrollbar-track{background:#060612}
+html.dark::-webkit-scrollbar-thumb{background:rgba(52,211,153,0.2)}
+
+/* ─── PLATFORM LOGOS ─── */
+.platform-logos{
+  display:flex;align-items:center;gap:24px;justify-content:center;
+  margin-top:32px;
+}
+.platform-logo{
+  opacity:0;transform:scale(0.3) translateY(20px);
+}
+@keyframes logoPop{
+  0%{opacity:0;transform:scale(0.3) translateY(20px)}
+  60%{opacity:1;transform:scale(1.1) translateY(-4px)}
+  80%{transform:scale(0.95) translateY(1px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+.platform-logo.pop-in{animation:logoPop 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards}
+.platform-logo.pop-out{
+  animation:none;
+  transition:opacity 0.35s cubic-bezier(0.34,1.56,0.64,1),transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  opacity:0 !important;transform:scale(0.3) translateY(20px) !important;
+}
+.platform-logo{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:100px;
+  border:1px solid rgba(0,0,0,0.06);background:#fff;
+  transition:all 0.5s cubic-bezier(0.25,1,0.5,1);backdrop-filter:blur(8px);
+  box-shadow:0 1px 4px rgba(0,0,0,0.03);
+}
+.platform-logo:hover{border-color:rgba(0,0,0,0.12);box-shadow:0 4px 16px rgba(0,0,0,0.06);transform:translateY(-2px)}
+.platform-logo svg{width:20px;height:20px}
+.platform-logo span{font-size:13px;font-weight:600;color:#666}
+
+/* ─── AMBIENT GLOW ORBS ─── */
+.ambient-orb{
+  position:fixed;pointer-events:none;border-radius:50%;filter:blur(120px);
+  opacity:0.15;z-index:0;animation:orbFloat 25s ease-in-out infinite;
+}
+html.dark .ambient-orb{opacity:0.35}
+.orb-1{width:600px;height:600px;background:var(--glow-1);top:-10%;left:-5%}
+.orb-2{width:500px;height:500px;background:var(--glow-2);bottom:-10%;right:-5%;animation-delay:-12s}
+.orb-3{width:400px;height:400px;background:rgba(16,185,129,0.03);top:40%;right:10%;animation-delay:-6s}
+html.dark .orb-3{background:rgba(52,211,153,0.04)}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-20px) scale(1.05)}
+  66%{transform:translate(-20px,30px) scale(0.95)}
+}
+
+/* ─── FLOATING / BREATHING ANIMATION ─── */
+@keyframes breathe1{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-8px) rotate(var(--rot,0deg))}}
+@keyframes breathe2{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-6px) rotate(var(--rot,0deg))}}
+@keyframes breathe3{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-10px) rotate(var(--rot,0deg))}}
+@keyframes breathe4{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-7px) rotate(var(--rot,0deg))}}
+
+.hero-float-el{
+  position:absolute;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.06);
+  border-radius:14px;
+  padding:12px 16px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.03);
+  z-index:2;
+  pointer-events:none;
+  white-space:nowrap;
+  backdrop-filter:blur(12px);
+  color:#1a1a1a;
+  /* POP IN on load */
+  opacity:0;
+  transform:scale(0.3) rotate(var(--rot,0deg));
+  animation-fill-mode:forwards;
+}
+@keyframes popIn{
+  0%{opacity:0;transform:scale(0.3) rotate(var(--rot,0deg)) translateY(40px)}
+  50%{opacity:1;transform:scale(1.08) rotate(var(--rot,0deg)) translateY(-5px)}
+  75%{transform:scale(0.96) rotate(var(--rot,0deg)) translateY(2px)}
+  100%{opacity:1;transform:scale(1) rotate(var(--rot,0deg)) translateY(0)}
+}
+.hero-float-el .hf-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#666;margin-bottom:4px}
+.hero-float-el .hf-value{font-size:16px;font-weight:800;letter-spacing:-0.5px;display:flex;align-items:center;gap:5px}
+.hero-float-el .hf-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.06)}
+
+/* Float positions — popIn on load, JS handles breathing + fade */
+.hf-roas{top:14%;left:6%;--rot:3deg;--delay:0.3s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-meta{top:10%;right:8%;--rot:-2deg;--delay:0.5s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-google{top:45%;right:4%;--rot:1deg;--delay:0.7s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-tiktok{bottom:28%;right:7%;--rot:-1deg;--delay:0.9s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-kill{top:48%;left:3%;--rot:-3deg;--delay:0.6s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-chart{bottom:22%;left:5%;--rot:2deg;--delay:0.8s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards}
+.hf-live{top:6%;left:50%;--rot:0deg;--delay:0.2s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards;padding:6px 14px}
+/* COLLAGE SECTION */
+.collage-section{
+  padding:80px 48px 100px;
+  background:linear-gradient(180deg,var(--bg) 0%,rgba(200,200,200,0.04) 50%,var(--bg) 100%);
+  overflow:hidden;
+}
+html.dark .collage-section{background:linear-gradient(180deg,var(--bg) 0%,rgba(255,255,255,0.015) 50%,var(--bg) 100%)}
+.collage-wrap{
+  position:relative;width:720px;height:520px;margin:0 auto;
+}
+@media(max-width:900px){.collage-wrap{width:100%;height:auto;display:flex;flex-direction:column;gap:20px;align-items:center}.collage-card,.collage-sticky{position:relative!important;transform:none!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important}}
+.collage-card{
+  position:absolute;border-radius:20px;padding:20px 22px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.1);transition:transform 0.3s,box-shadow 0.3s;
+}
+.collage-card:hover{transform:rotate(0deg)!important;box-shadow:0 24px 60px rgba(0,0,0,0.15)}
+.collage-campaigns{
+  background:#fff;width:310px;top:0;left:40px;
+  transform:rotate(-5deg);z-index:1;
+}
+html.dark .collage-campaigns{background:#111;box-shadow:0 16px 48px rgba(0,0,0,0.5)}
+.collage-leads{
+  background:#fafafa;width:290px;top:10px;right:40px;
+  transform:rotate(4deg);z-index:2;
+  border:1px solid rgba(0,0,0,0.04);
+}
+html.dark .collage-leads{background:#0f0f14;border-color:rgba(255,255,255,0.06);box-shadow:0 16px 48px rgba(0,0,0,0.5)}
+.lead-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 0;border-bottom:1px solid rgba(0,0,0,0.06);
+}
+html.dark .lead-row{border-color:rgba(255,255,255,0.06)}
+.lead-label{font-size:14px;color:#666;font-weight:400}
+html.dark .lead-label{color:rgba(255,255,255,0.45)}
+.lead-val{font-size:16px;font-weight:800;color:#111;letter-spacing:-0.5px}
+html.dark .lead-val{color:#f5f5f5}
+.collage-sticky{
+  position:absolute;bottom:0px;left:50%;transform:translateX(-40%) rotate(3deg);
+  z-index:3;width:280px;
+}
+.collage-clip{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(15deg);z-index:4;
+  width:16px;height:48px;border:2px solid #94a3b8;border-radius:4px 4px 8px 8px;
+  background:linear-gradient(180deg,#cbd5e1 0%,#94a3b8 100%);opacity:0.6;
+}
+.sticky-tape{
+  width:48px;height:18px;background:rgba(147,197,253,0.5);
+  border-radius:2px;margin:0 auto -8px;position:relative;z-index:1;
+  transform:rotate(-2deg);
+}
+.sticky-body{
+  background:#fde68a;padding:18px 20px 16px;border-radius:2px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.12);
+  font-family:'Caveat','Segoe Script','Comic Sans MS',cursive;
+}
+.sticky-crossed{
+  font-size:17px;color:rgba(0,0,0,0.3);text-decoration:line-through;
+  margin-bottom:4px;
+}
+.sticky-main{
+  font-size:22px;font-weight:700;color:#111;margin-top:6px;
+}
+.hf-campaigns-unused{bottom:5%;left:4%;--rot:-1deg;--delay:0.4s;animation:popIn 0.8s cubic-bezier(0.34,1.56,0.64,1) var(--delay) forwards;padding:20px 24px;width:320px;border-radius:20px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.1)}
+html.dark .hf-campaigns{background:#111;box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+.hf-campaigns .camp-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:14px}
+.hf-campaigns .camp-pills{display:flex;gap:8px;margin-bottom:16px}
+.hf-campaigns .camp-pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600}
+.hf-campaigns .camp-pill.meta{background:#dbeafe;color:#1d4ed8}
+.hf-campaigns .camp-pill.tiktok{background:#fce7f3;color:#be185d}
+.hf-campaigns .camp-pill.google{background:#dcfce7;color:#15803d}
+.hf-campaigns .camp-pill-dot{width:6px;height:6px;border-radius:50%}
+.hf-campaigns .camp-pill.meta .camp-pill-dot{background:#1d4ed8}
+.hf-campaigns .camp-pill.tiktok .camp-pill-dot{background:#be185d}
+.hf-campaigns .camp-pill.google .camp-pill-dot{background:#15803d}
+.hf-campaigns .camp-divider{height:1px;background:rgba(0,0,0,0.06);margin-bottom:16px}
+html.dark .hf-campaigns .camp-divider{background:rgba(255,255,255,0.06)}
+.hf-campaigns .camp-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hf-campaigns .camp-stat-val{font-size:28px;font-weight:900;letter-spacing:-1.5px;color:#111;line-height:1}
+html.dark .hf-campaigns .camp-stat-val{color:#f5f5f5}
+.hf-campaigns .camp-stat-label{font-size:11px;color:#999;margin-top:4px;font-weight:500}
+.hf-campaigns .camp-stat-box{background:#f3f4f6;border-radius:12px;padding:14px 16px;text-align:center}
+html.dark .hf-campaigns .camp-stat-box{background:#1a1a1f}
+
+/* After popIn finishes, JS takes over — this class removes the CSS animation so inline styles work */
+.hero-float-el.js-active{animation:none !important}
+
+@media(max-width:900px){
+  .hero-float-el{display:none !important}
+}
+
+/* ─── HERO SPOTLIGHT BEAM ─── */
+.hero-spotlight{
+  position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:100%;height:700px;pointer-events:none;z-index:0;
+  background:conic-gradient(from 180deg at 50% 0%,transparent 40%,rgba(52,211,153,0.06) 47%,rgba(200,200,255,0.08) 50%,rgba(52,211,153,0.06) 53%,transparent 60%);
+  mask-image:linear-gradient(to bottom,black 0%,transparent 85%);
+  -webkit-mask-image:linear-gradient(to bottom,black 0%,transparent 85%);
+  animation:spotlightPulse 8s ease-in-out infinite;
+  opacity:0;
+}
+html.dark .hero-spotlight{opacity:0.6}
+@keyframes spotlightPulse{
+  0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1)}
+  50%{opacity:1;transform:translateX(-50%) scaleX(1.05)}
+}
+
+/* ─── HERO TITLE GRADIENT ─── */
+.hero-title-gradient{
+  background:none;-webkit-text-fill-color:#1a1a1a;
+}
+
+/* ─── STAGGER CHILDREN ─── */
+.stagger-in > *{
+  opacity:0;transform:translateY(30px) scale(0.97);
+  transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.stagger-in.in > *:nth-child(1){transition-delay:0s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(2){transition-delay:0.1s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(3){transition-delay:0.2s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(4){transition-delay:0.3s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(5){transition-delay:0.4s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(6){transition-delay:0.5s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(7){transition-delay:0.6s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(8){transition-delay:0.7s;opacity:1;transform:none}
+
+/* ─── ANIMATIONS ─── */
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{opacity:0.6}50%{opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(0.85);opacity:0.6}}
+
+.reveal{
+  opacity:0;transform:translateY(60px);
+  transition:opacity 1s cubic-bezier(0.25,1,0.5,1),transform 1s cubic-bezier(0.25,1,0.5,1);
+  will-change:opacity,transform;
+}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}.d4{transition-delay:.48s}
+
+/* ─── SMOOTH STAGGER ─── */
+.stagger-in > *{
+  opacity:0;transform:translateY(50px);
+  transition:opacity 0.9s cubic-bezier(0.25,1,0.5,1),transform 0.9s cubic-bezier(0.25,1,0.5,1);
+}
+.stagger-in.in > *:nth-child(1){transition-delay:0s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(2){transition-delay:0.1s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(3){transition-delay:0.2s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(4){transition-delay:0.3s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(5){transition-delay:0.4s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(6){transition-delay:0.5s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(7){transition-delay:0.6s;opacity:1;transform:none}
+.stagger-in.in > *:nth-child(8){transition-delay:0.7s;opacity:1;transform:none}
+
+/* ─── GLOW CARD EFFECT (dark mode) ─── */
+.glow-card{position:relative;overflow:hidden;transition:all 0.6s cubic-bezier(0.25,1,0.5,1)}
+html.dark .glow-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(52,211,153,0.2),rgba(80,60,200,0.1),transparent 60%);
+  opacity:0;transition:opacity 0.4s;z-index:-1;
+}
+html.dark .glow-card:hover::before{opacity:1}
+html.dark .glow-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 40px rgba(52,211,153,0.06)}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:60px;padding:0 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all 0.3s;
+}
+nav.scrolled{
+  background:rgba(245,245,243,0.9);
+  backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+html.dark nav.scrolled{background:rgba(6,6,18,0.85);box-shadow:none}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mark{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;color:#fff;letter-spacing:-1px;
+}
+.logo-name{font-weight:800;font-size:17px;letter-spacing:-0.3px;color:#1a1a1a}
+.nav-mid{display:flex;gap:30px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-mid a{font-size:14px;font-weight:500;color:#666;transition:color 0.2s}
+.nav-mid a:hover{color:#1a1a1a}
+.nav-right{display:flex;align-items:center;gap:10px}
+.btn-ghost{
+  padding:7px 16px;font-size:14px;font-weight:500;color:#666;
+  background:none;border:none;cursor:pointer;transition:color 0.2s;
+}
+.btn-ghost:hover{color:#1a1a1a}
+.btn-cta{
+  padding:9px 22px;border-radius:100px;font-size:14px;font-weight:600;
+  background:#1a1a1a;letter-spacing:-0.01em;
+  color:#fff;border:none;cursor:pointer;
+  transition:background 0.5s ease,transform 0.5s cubic-bezier(0.25,1,0.5,1),box-shadow 0.5s ease;
+}
+.btn-cta:hover{background:#000;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+
+/* ─── HERO ─── */
+.hero{
+  min-height:auto;
+  padding:160px 48px 80px;
+  text-align:center;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);
+}
+.hero-glow{
+  position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+  width:900px;height:700px;
+  background:radial-gradient(ellipse,rgba(16,185,129,0.04) 0%,transparent 60%);
+  pointer-events:none;animation:glow 6s ease-in-out infinite;
+}
+.hero-content{position:relative;z-index:3;max-width:800px;margin:0 auto}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 14px 5px 9px;border-radius:100px;
+  border:1px solid rgba(16,185,129,0.15);background:rgba(16,185,129,0.08);
+  font-size:12px;font-weight:600;color:var(--green);
+  margin-bottom:26px;animation:fade-up 0.5s ease both;letter-spacing:0.2px;
+  backdrop-filter:blur(10px);
+}
+.hero-badge-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s ease-in-out infinite;
+}
+h1{
+  font-size:clamp(48px,7vw,88px);font-weight:900;
+  letter-spacing:-3px;line-height:1.02;
+  margin-bottom:22px;color:#1a1a1a;
+  animation:fade-up 0.5s ease 0.08s both;
+}
+.shimmer-text{
+  background:linear-gradient(90deg,var(--green) 0%,var(--green2) 30%,#059669 50%,var(--green2) 70%,var(--green) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 4s linear infinite;
+}
+.hero-sub{
+  font-size:clamp(16px,1.8vw,20px);color:#666;font-weight:400;
+  line-height:1.65;max-width:560px;margin:0 auto 36px;
+  animation:fade-up 0.5s ease 0.15s both;
+}
+.hero-actions{
+  display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;
+  animation:fade-up 0.5s ease 0.22s both;margin-bottom:14px;
+}
+.btn-hero{
+  padding:16px 36px;border-radius:100px;font-size:15px;font-weight:600;
+  background:#1a1a1a;letter-spacing:-0.01em;
+  color:#fff;border:none;cursor:pointer;
+  transition:background 0.5s ease,transform 0.5s cubic-bezier(0.25,1,0.5,1),box-shadow 0.5s ease;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-hero:hover{background:#000;transform:translateY(-1px);box-shadow:0 12px 32px rgba(0,0,0,0.12)}
+.btn-hero-outline{
+  padding:16px 36px;border-radius:100px;font-size:15px;font-weight:600;
+  background:transparent;color:#1a1a1a;letter-spacing:-0.01em;
+  border:1px solid rgba(0,0,0,0.15);cursor:pointer;
+  transition:all 0.5s cubic-bezier(0.25,1,0.5,1);
+}
+.btn-hero-outline:hover{border-color:rgba(0,0,0,0.3);background:rgba(0,0,0,0.03)}
+.hero-note{
+  font-size:13px;color:#999;
+  animation:fade-up 0.5s ease 0.28s both;
+}
+.hero-trust{
+  font-size:14px;color:#999;margin-top:32px;
+  animation:fade-up 0.5s ease 0.35s both;
+  font-weight:500;
+}
+html.dark .hero-trust{color:rgba(255,255,255,0.35)}
+
+/* ─── TRUST BAR ─── */
+.trust-bar{
+  padding:32px 48px;
+  display:flex;align-items:center;justify-content:center;gap:48px;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  animation:fade-up 0.5s ease 0.35s both;
+}
+.trust-text{font-size:13px;font-weight:600;color:#999;white-space:nowrap}
+.trust-logos{display:flex;align-items:center;gap:32px}
+.trust-logo{font-size:14px;font-weight:700;color:#bbb;letter-spacing:0.5px;opacity:0.5;white-space:nowrap}
+
+/* ─── DASHBOARD MOCKUP SECTION ─── */
+.dashboard-section{
+  padding:130px 48px 60px;
+  background:var(--bg-alt);
+}
+.dashboard-section-inner{
+  max-width:1100px;margin:0 auto;
+}
+.dashboard-section .sec-center{margin-bottom:48px}
+
+/* ─── DASHBOARD MOCKUP ─── */
+.mockup-wrap{
+  max-width:1100px;margin:0 auto;
+  animation:fade-up 0.7s ease 0.35s both;
+  position:relative;
+}
+.mockup-blur-bot{
+  position:absolute;bottom:0;left:0;right:0;height:120px;
+  background:linear-gradient(to top,var(--bg-alt),transparent);
+  pointer-events:none;z-index:2;
+}
+html.dark .mockup-blur-bot{background:linear-gradient(to top,var(--bg-alt),transparent)}
+.dashboard{
+  background:#0c0c1a;border-radius:20px;overflow:hidden;
+  border:1px solid rgba(0,0,0,0.08);
+  box-shadow:0 24px 64px rgba(0,0,0,0.12);
+}
+html.dark .dashboard{border-color:rgba(255,255,255,0.08);box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 60px rgba(52,211,153,0.04)}
+.db-topbar{
+  background:#161616;padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.db-dots{display:flex;gap:6px}
+.db-dot{width:10px;height:10px;border-radius:50%}
+.db-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.2px}
+.db-live{
+  display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);
+  padding:3px 10px;border-radius:100px;
+}
+.db-live-dot{width:5px;height:5px;border-radius:50%;background:#34d399;animation:pulse 2s ease-in-out infinite}
+.db-panel{animation:fade-up 0.25s ease both}
+.db-tabs{
+  display:flex;gap:0;
+  background:#141414;border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:0 20px;overflow-x:auto;
+}
+.db-tabs::-webkit-scrollbar{height:0}
+.db-tab{
+  padding:10px 16px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.5);
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;
+}
+.db-tab.on{color:#34d399;border-bottom-color:#34d399}
+.db-kpis{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:#111;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.db-kpi{padding:16px 18px;border-right:1px solid rgba(255,255,255,0.06)}
+.db-kpi:last-child{border-right:none}
+.db-kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.5);margin-bottom:5px}
+.db-kpi-val{font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#f0f0f5}
+.db-kpi-delta{font-size:11px;margin-top:2px;font-weight:500}
+.up{color:#16a34a}.down{color:#10b981}
+html.dark .up{color:#34d399}html.dark .down{color:#6ee7b7}
+.db-thead{
+  display:grid;grid-template-columns:44px 2.2fr 1fr 1fr 1fr 1fr 1fr 90px;
+  padding:8px 20px;background:#141414;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.db-th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)}
+.db-row{
+  display:grid;grid-template-columns:44px 2.2fr 1fr 1fr 1fr 1fr 1fr 90px;
+  padding:13px 20px;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,0.035);
+  cursor:pointer;transition:background 0.15s;
+}
+.db-toggle{width:36px;height:20px;border-radius:10px;cursor:pointer;position:relative;transition:all 0.2s;flex-shrink:0}
+.db-toggle.on{background:rgba(52,211,153,0.3);border:1px solid rgba(52,211,153,0.4)}
+.db-toggle.off{background:rgba(248,81,73,0.2);border:1px solid rgba(248,81,73,0.3)}
+.db-toggle::after{content:'';position:absolute;top:2px;width:14px;height:14px;border-radius:50%;transition:all 0.2s}
+.db-toggle.on::after{right:2px;background:#34d399}
+.db-toggle.off::after{left:2px;background:#f85149}
+.roas-bar{position:relative;cursor:pointer;transition:all 0.15s}.roas-bar:hover{filter:brightness(1.4);transform:scaleY(1.08);transform-origin:bottom}
+.db-row:last-child{border-bottom:none}
+.db-row:hover{background:rgba(255,255,255,0.025)}
+.db-campaign{display:flex;align-items:center;gap:10px}
+.db-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.db-status.live{background:#34d399;box-shadow:0 0 5px rgba(52,211,153,0.5)}
+.db-status.learning{background:#f0883e;box-shadow:0 0 5px rgba(240,136,62,0.4)}
+.db-status.paused{background:#484f58}
+.db-cname{font-size:13px;font-weight:500;color:#f0f0f5}
+.db-ctype{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px}
+.db-td{font-size:13px;color:#f0f0f5}
+.db-td.dim{color:rgba(255,255,255,0.5)}
+.db-td.green{color:#34d399;font-weight:600}
+.db-td.red{color:#f85149}
+.spark{display:flex;align-items:flex-end;gap:2px;height:22px}
+.spark-b{width:6px;border-radius:2px 2px 0 0;background:rgba(52,211,153,0.35)}
+.db-row:hover .spark-b{background:rgba(52,211,153,0.6)}
+.db-apex-row{
+  padding:11px 20px;
+  background:linear-gradient(90deg,rgba(52,211,153,0.06),transparent);
+  border-top:1px solid rgba(52,211,153,0.12);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.db-apex-msg{font-size:12px;color:#34d399;font-weight:500}
+.db-apex-btn{
+  background:#34d399;color:#080808;border:none;
+  padding:4px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;
+  white-space:nowrap;
+}
+
+/* ─── STATS BAR ─── */
+.stats{
+  display:flex;align-items:stretch;justify-content:center;
+  border-top:none;border-bottom:none;
+  background:#fff;
+}
+.stat{
+  flex:1;max-width:260px;
+  padding:36px 20px;text-align:center;
+  border-right:1px solid rgba(0,0,0,0.06);
+}
+.stat:last-child{border-right:none}
+.stat-n{
+  font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-l{font-size:14px;color:#999;margin-top:6px}
+
+/* ─── SECTION SCAFFOLDING ─── */
+.sec{padding:56px 48px;max-width:1160px;margin:0 auto}
+.sec-full{padding:56px 48px}
+
+/* ─── INLINE CTA BLOCK ─── */
+.inline-cta{
+  text-align:center;padding:32px 48px;
+}
+.inline-cta p{font-size:15px;color:var(--muted);margin-bottom:16px}
+.inline-cta .btn-hero{font-size:14px;padding:12px 28px}
+.inline-cta .btn-hero-outline{font-size:14px;padding:12px 28px}
+.inline-cta-actions{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ─── SECTION DIVIDER ─── */
+.sec-divider{
+  width:100%;max-width:200px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,0.08),transparent);
+  margin:0 auto;
+}
+html.dark .sec-divider{background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)}
+.sec-center{text-align:center}
+.eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);margin-bottom:14px;display:block;
+}
+.sec-h{
+  font-size:clamp(30px,3.8vw,50px);font-weight:900;
+  letter-spacing:-1.5px;line-height:1.08;margin-bottom:14px;
+}
+.sec-p{font-size:17px;color:#666;line-height:1.65;max-width:520px}
+.sec-center .sec-p{margin:0 auto}
+
+/* ─── ONE-STOP SHOP ─── */
+.oss-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+  margin-top:32px;
+}
+.oss-card{
+  background:#fff;padding:28px 28px;
+  position:relative;overflow:hidden;
+  transition:all 0.6s cubic-bezier(0.25,1,0.5,1);
+  border:1px solid rgba(0,0,0,0.06);border-radius:var(--card-radius);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.oss-card:hover{
+  box-shadow:0 16px 48px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.04);
+  border-color:rgba(0,0,0,0.08);
+  transform:translateY(-4px);
+}
+.oss-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(16,185,129,0.03),transparent 55%);
+  opacity:0;transition:opacity 0.4s;
+}
+.oss-card:hover::after{opacity:1}
+.oss-num{
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);margin-bottom:20px;
+}
+.oss-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.12);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green);margin-bottom:18px;
+}
+.oss-card h3{font-size:19px;font-weight:800;letter-spacing:-0.4px;margin-bottom:10px;color:#1a1a1a}
+.oss-card p{font-size:14px;color:#666;line-height:1.7}
+
+/* ─── HOW IT WORKS ─── */
+.hiw-bg{background:#fff;border-top:none;border-bottom:none}
+.hiw-steps{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+  margin-top:32px;max-width:1160px;margin-left:auto;margin-right:auto;
+}
+.hiw-step{
+  background:#fff;padding:28px 28px;border:1px solid rgba(0,0,0,0.06);
+  position:relative;transition:all 0.6s cubic-bezier(0.25,1,0.5,1);
+  border-radius:var(--card-radius);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.hiw-step:hover{box-shadow:0 16px 48px rgba(0,0,0,0.08);border-color:rgba(0,0,0,0.08);transform:translateY(-4px)}
+.step-n{
+  font-size:64px;font-weight:900;letter-spacing:-4px;
+  color:rgba(16,185,129,0.1);line-height:1;margin-bottom:18px;
+}
+.hiw-step h3{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:10px;color:#1a1a1a}
+.hiw-step p{font-size:14px;color:#666;line-height:1.7}
+
+/* ─── WHY APEX ─── */
+.why-section-bg{background:#fff;border-top:none;border-bottom:none}
+.why-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:18px;
+  margin-top:32px;
+}
+.why-card{
+  background:#fff;padding:28px 28px;border:1px solid rgba(0,0,0,0.06);
+  transition:all 0.6s cubic-bezier(0.25,1,0.5,1);position:relative;overflow:hidden;
+  border-radius:var(--card-radius);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.why-card:hover{box-shadow:0 16px 48px rgba(0,0,0,0.08);border-color:rgba(0,0,0,0.08);transform:translateY(-4px)}
+.why-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.12);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green);margin-bottom:20px;
+}
+.why-card h3{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:10px;color:#1a1a1a}
+.why-card p{font-size:14px;color:#666;line-height:1.7}
+.why-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:16px;font-size:12px;font-weight:600;color:var(--green);
+  background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.1);
+  padding:4px 10px;border-radius:6px;
+}
+.why-tag.red{color:#10b981;background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.1)}
+
+/* ─── PLATFORMS ─── */
+.platform-tabs{
+  display:flex;gap:8px;justify-content:center;margin-bottom:40px;margin-top:28px;
+}
+.ptab{
+  padding:8px 20px;border-radius:100px;font-size:14px;font-weight:600;
+  border:1px solid var(--border2);color:var(--muted);cursor:pointer;
+  transition:all 0.2s;background:transparent;
+}
+.ptab.on{
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#060612;border-color:transparent;
+  box-shadow:0 0 20px rgba(52,211,153,0.2);
+}
+.ptab:hover:not(.on){color:var(--text);border-color:rgba(0,0,0,0.15)}
+html.dark .ptab:hover:not(.on){border-color:rgba(255,255,255,0.2)}
+
+/* GOOGLE ADS MOCKUP */
+.google-ui{
+  background:#1a1a2e;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(0,0,0,0.08);
+  box-shadow:0 16px 48px rgba(0,0,0,0.1);
+}
+html.dark .google-ui{border-color:rgba(255,255,255,0.08);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.g-topbar{
+  background:#24243e;padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.g-logo{display:flex;align-items:center;gap:3px}
+.g-g{width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.g-name{font-size:13px;font-weight:600;color:#c9d1d9;margin-left:8px}
+.g-account{font-size:11px;color:#8b949e;margin-left:6px}
+.g-tabs{display:flex;padding:0 20px;background:#1e1e38;border-bottom:1px solid rgba(255,255,255,0.06)}
+.g-tab{padding:10px 14px;font-size:12px;color:#8b949e;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.g-tab.on{color:#79b8ff;border-bottom-color:#79b8ff}
+.g-kpis{display:grid;grid-template-columns:repeat(4,1fr);background:#1a1a2e;border-bottom:1px solid rgba(255,255,255,0.06)}
+.g-kpi{padding:16px 18px;border-right:1px solid rgba(255,255,255,0.05)}
+.g-kpi:last-child{border-right:none}
+.g-kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#8b949e;margin-bottom:5px}
+.g-kpi-v{font-size:20px;font-weight:800;color:#c9d1d9;letter-spacing:-0.5px}
+.g-kpi-d{font-size:11px;margin-top:2px}
+.g-chart{padding:16px 20px;background:#1e1e38;border-bottom:1px solid rgba(255,255,255,0.06)}
+.g-chart-l{font-size:11px;color:#8b949e;margin-bottom:10px}
+.g-bars{height:60px;display:flex;align-items:flex-end;gap:3px}
+.g-bar{flex:1;border-radius:2px 2px 0 0}
+.g-thead{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:8px 20px;background:#24243e;border-bottom:1px solid rgba(255,255,255,0.06)}
+.g-th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#8b949e}
+.g-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:12px 20px;align-items:center;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.15s}
+.g-row:hover{background:rgba(255,255,255,0.025)}
+.g-row:last-child{border-bottom:none}
+.g-rname{font-size:13px;font-weight:500;color:#c9d1d9}
+.g-rtype{font-size:11px;color:#8b949e;margin-top:1px}
+.g-td{font-size:13px;color:#c9d1d9}
+.g-td.dim{color:#8b949e}
+.g-status{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.g-status.en{background:rgba(129,201,149,0.12);color:#81c995}
+.g-status.pa{background:rgba(139,148,158,0.12);color:#8b949e}
+.g-status.li{background:rgba(240,136,62,0.12);color:#f0883e}
+.g-apex{padding:12px 20px;background:linear-gradient(90deg,rgba(52,211,153,0.06),transparent);border-top:1px solid rgba(52,211,153,0.1);display:flex;align-items:center;gap:10px}
+.g-apex-t{font-size:12px;color:#34d399;font-weight:500}
+
+/* ─── PLATFORM SECTION ─── */
+.platform-section{display:none}
+.platform-section.active{display:block}
+
+/* ─── COMPARISON ─── */
+.comp-bg{background:#fff;border-top:none;border-bottom:none}
+.comp-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  margin-top:28px;max-width:860px;margin-left:auto;margin-right:auto;
+}
+.comp-table th{
+  padding:13px 24px;font-size:11px;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;
+  border-bottom:2px solid var(--border2);text-align:left;
+}
+.comp-table th:first-child{width:45%;color:var(--muted)}
+.comp-table th.apex-col{
+  color:var(--green);text-align:center;width:27.5%;
+  background:rgba(16,185,129,0.04);border-radius:10px 10px 0 0;
+}
+.comp-table th.them-col{color:var(--dim);text-align:center;width:27.5%}
+.comp-table td{padding:12px 24px;font-size:14px;border-bottom:1px solid var(--border);color:#666}
+.comp-table td:first-child{color:#666;font-weight:500}
+.comp-table td.apex-col{text-align:center;background:rgba(16,185,129,0.02)}
+.comp-table td.them-col{text-align:center;color:var(--dim)}
+.comp-table tr:last-child td{border-bottom:none}
+.c-yes{color:var(--green);font-weight:700;font-size:15px}
+.c-no{color:#10b981;font-weight:600;font-size:13px}
+.c-partial{color:#d97706;font-size:13px}
+html.dark .comp-table th{color:rgba(255,255,255,0.5);border-bottom-color:rgba(255,255,255,0.1)}
+html.dark .comp-table th.apex-col{background:rgba(52,211,153,0.04);color:var(--green)}
+html.dark .comp-table td{color:rgba(255,255,255,0.5);border-bottom-color:rgba(255,255,255,0.06)}
+html.dark .comp-table td:first-child{color:rgba(255,255,255,0.5)}
+html.dark .comp-table td.apex-col{background:rgba(52,211,153,0.03)}
+
+/* ─── TESTIMONIAL ─── */
+.testi-wrap{
+  max-width:720px;margin:0 auto;text-align:center;
+  padding:36px 48px;
+}
+.testi-quote{
+  font-size:clamp(20px,2.5vw,28px);font-weight:600;
+  line-height:1.5;letter-spacing:-0.5px;color:#1a1a1a;
+  margin-bottom:32px;
+}
+.testi-quote em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.testi-author{display:flex;align-items:center;gap:12px;justify-content:center}
+.testi-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;
+  box-shadow:0 0 20px rgba(16,185,129,0.15);
+}
+.testi-name{font-size:14px;font-weight:700;text-align:left;color:#1a1a1a}
+.testi-role{font-size:13px;color:#999}
+
+/* ─── PRICING ─── */
+.pricing-bg{background:#fff;border-top:none;border-bottom:none}
+.pricing-note{
+  text-align:center;margin-top:16px;
+  font-size:13px;color:#999;
+}
+.pricing-note span{color:var(--green)}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:18px;margin-top:28px;
+}
+.p-card{
+  background:#fff;border:1px solid rgba(0,0,0,0.06);
+  border-radius:24px;padding:36px 30px;
+  position:relative;transition:all 0.6s cubic-bezier(0.25,1,0.5,1);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.p-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.08);border-color:rgba(0,0,0,0.08)}
+.p-card.hot{
+  border-color:rgba(16,185,129,0.25);
+  background:#fff;
+}
+.p-card.hot:hover{box-shadow:0 16px 48px rgba(16,185,129,0.08)}
+.p-badge{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:#1a1a1a;
+  color:#fff;padding:3px 14px;border-radius:100px;
+  font-size:11px;font-weight:700;letter-spacing:0.4px;white-space:nowrap;
+}
+.p-tier{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:8px}
+.p-price{display:flex;align-items:flex-start;gap:3px;margin-bottom:6px}
+.p-dollar{font-size:22px;font-weight:700;color:#999;padding-top:8px}
+.p-num{font-size:56px;font-weight:900;letter-spacing:-3px;line-height:1;color:#1a1a1a}
+.p-num.g{
+  background:none;-webkit-text-fill-color:#1a1a1a;
+}
+html.dark .p-num.g{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.p-per{font-size:14px;color:#999;padding-bottom:4px;align-self:flex-end}
+.p-desc{font-size:14px;color:#666;margin-bottom:24px;line-height:1.5}
+.p-divider{height:1px;background:rgba(0,0,0,0.06);margin-bottom:22px}
+.p-feats{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.p-feats li{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:#666}
+.p-feats li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.p-btn{
+  width:100%;padding:14px;border-radius:100px;
+  font-size:15px;font-weight:600;cursor:pointer;border:none;
+  transition:background 0.5s ease,transform 0.5s cubic-bezier(0.25,1,0.5,1),box-shadow 0.5s ease;
+  letter-spacing:-0.01em;
+}
+.p-btn.solid{background:#1a1a1a;color:#fff}
+.p-btn.solid:hover{background:#000;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.p-btn.line{background:transparent;color:var(--text);border:1px solid rgba(0,0,0,0.12)}
+.p-btn.line:hover{border-color:rgba(0,0,0,0.25);background:rgba(0,0,0,0.02)}
+
+/* ─── COST COMPARISON ─── */
+.cost-bg{background:var(--bg);padding:48px 48px}
+.cost-inner{max-width:1000px;margin:0 auto}
+.cost-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;margin-top:28px;align-items:stretch}
+.cost-col{background:#fff;border-radius:var(--card-radius);padding:28px 28px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.cost-col.old{border:1px solid rgba(16,185,129,0.15);position:relative}
+.cost-col.old::before{
+  content:'What you pay now';position:absolute;top:-13px;left:24px;
+  background:#10b981;color:#fff;padding:3px 12px;border-radius:100px;
+  font-size:11px;font-weight:700;letter-spacing:0.3px;
+}
+.cost-col.new{border:1px solid rgba(16,185,129,0.2);position:relative;
+  background:#fff;
+}
+.cost-col.new::before{
+  content:'APEX replaces all of it';position:absolute;top:-13px;left:24px;
+  background:#1a1a1a;color:#fff;
+  padding:3px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:0.3px;
+}
+.cost-vs{display:flex;align-items:center;justify-content:center}
+.cost-vs-badge{
+  width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid rgba(0,0,0,0.08);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#999;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+html.dark .cost-vs-badge{background:#0e0e22;border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)}
+.cost-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+.cost-item:last-child{border-bottom:none}
+.cost-label{font-size:14px;color:#666}
+.cost-price{font-size:14px;font-weight:700;color:#1a1a1a}
+.cost-price.red{color:#10b981}
+.cost-total{margin-top:20px;padding-top:16px;border-top:2px solid rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center}
+.cost-total-label{font-size:16px;font-weight:700;color:#1a1a1a}
+.cost-total-price{font-size:28px;font-weight:900;letter-spacing:-1px}
+.cost-total-price.red{color:#10b981}
+.cost-total-price.green{
+  background:none;-webkit-text-fill-color:var(--green);color:var(--green);
+}
+html.dark .cost-total-price.green{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cost-savings{
+  text-align:center;margin-top:28px;padding:20px;
+  background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.1);
+  border-radius:14px;
+}
+.cost-savings-n{font-size:36px;font-weight:900;color:var(--green);letter-spacing:-1.5px}
+.cost-savings-l{font-size:14px;color:#666;margin-top:4px}
+
+/* ─── MORE TESTIMONIALS ─── */
+.testi-section-bg{padding:48px 0;background:#fff;border-top:none;border-bottom:none}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+  max-width:1160px;margin:0 auto;padding:0 48px;
+}
+.testi-card{
+  background:#fff;border:1px solid rgba(0,0,0,0.06);
+  border-radius:var(--card-radius);padding:32px 28px;transition:all 0.6s cubic-bezier(0.25,1,0.5,1);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.testi-card:hover{transform:translateY(-4px);border-color:rgba(0,0,0,0.08);box-shadow:0 16px 48px rgba(0,0,0,0.08)}
+.testi-card-stars{font-size:14px;color:var(--green);margin-bottom:14px;letter-spacing:2px}
+.testi-card-text{font-size:14px;line-height:1.7;color:#666;margin-bottom:20px}
+.testi-card-text em{font-style:normal;color:#1a1a1a;font-weight:600}
+.testi-card-foot{display:flex;align-items:center;gap:10px}
+.testi-card-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;
+}
+.testi-card-name{font-size:13px;font-weight:700;color:#1a1a1a}
+.testi-card-role{font-size:12px;color:#999}
+.testi-card-ind{
+  display:inline-block;margin-top:10px;font-size:11px;font-weight:600;
+  color:var(--green);background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.1);
+  padding:3px 9px;border-radius:5px;
+}
+
+/* ─── FAQ ─── */
+.faq-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:18px;
+  max-width:960px;margin:48px auto 0;
+}
+.faq-item{
+  background:#fff;border:1px solid rgba(0,0,0,0.06);
+  border-radius:var(--card-radius);padding:24px 28px;cursor:pointer;
+  transition:all 0.5s cubic-bezier(0.25,1,0.5,1);box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.faq-item:hover{border-color:rgba(0,0,0,0.1);box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+.faq-q{font-size:15px;font-weight:700;color:#1a1a1a;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-arrow{color:#999;font-size:18px;transition:transform 0.5s cubic-bezier(0.25,1,0.5,1);flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(45deg);color:var(--green)}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.6s cubic-bezier(0.25,1,0.5,1),margin 0.6s cubic-bezier(0.25,1,0.5,1),opacity 0.5s ease;
+  font-size:14px;color:#666;line-height:1.7;opacity:0;
+}
+.faq-item.open .faq-a{max-height:200px;margin-top:14px;opacity:1}
+
+/* ─── GUARANTEE ─── */
+.guarantee{
+  max-width:720px;margin:0 auto;text-align:center;padding:28px 48px;
+}
+.guarantee-icon{
+  width:64px;height:64px;border-radius:50%;margin:0 auto 20px;
+  background:rgba(16,185,129,0.06);border:2px solid rgba(16,185,129,0.1);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+}
+.guarantee h3{font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px;color:#1a1a1a}
+.guarantee p{font-size:15px;color:#666;line-height:1.7}
+
+/* ─── FINAL CTA ─── */
+.fcta{
+  padding:140px 48px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.fcta-glow{
+  position:absolute;bottom:-160px;left:50%;transform:translateX(-50%);
+  width:800px;height:600px;
+  background:radial-gradient(ellipse,rgba(16,185,129,0.04) 0%,transparent 60%);
+  pointer-events:none;opacity:0.3;
+}
+html.dark .fcta-glow{background:radial-gradient(ellipse,rgba(52,211,153,0.08) 0%,rgba(80,60,200,0.03) 40%,transparent 65%);opacity:1}
+.fcta h2{
+  font-size:clamp(38px,5.5vw,68px);font-weight:900;
+  letter-spacing:-2.5px;line-height:1.05;margin-bottom:18px;color:#1a1a1a;
+}
+.fcta p{font-size:18px;color:#666;max-width:500px;margin:0 auto 36px;line-height:1.6}
+.fcta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.fcta-trust{margin-top:18px;font-size:13px;color:#999}
+
+/* ─── FOOTER ─── */
+footer{
+  border-top:1px solid rgba(0,0,0,0.06);
+  padding:36px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.foot-logo{display:flex;align-items:center;gap:8px}
+.foot-mark{
+  width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:12px;color:#fff;
+}
+.foot-name{font-size:14px;font-weight:800;letter-spacing:-0.2px;color:#1a1a1a}
+.foot-by{font-size:13px;color:#999;margin-left:4px}
+.foot-links{display:flex;gap:22px}
+.foot-links a{font-size:13px;color:#999;transition:color 0.2s}
+.foot-links a:hover{color:#666}
+.foot-copy{font-size:13px;color:#999}
+
+/* ─── TICKER ─── */
+.ticker-wrap{
+  overflow:hidden;
+  border-top:1px solid rgba(0,0,0,0.04);border-bottom:1px solid rgba(0,0,0,0.04);
+  padding:12px 0;background:#fff;
+}
+.ticker-track{display:flex;width:max-content;animation:ticker 30s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+.t-item{
+  display:flex;align-items:center;gap:7px;
+  padding:0 28px;font-size:13px;font-weight:500;color:#999;white-space:nowrap;
+}
+.t-sep{color:var(--green);opacity:0.3;font-size:16px;padding:0 4px}
+.t-dot{width:4px;height:4px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .nav-mid{display:none}
+  .hero{padding:100px 20px 40px;min-height:auto}
+  .hero-content{max-width:100%}
+  h1{font-size:clamp(36px,10vw,56px);letter-spacing:-2px}
+  .hero-sub{font-size:16px}
+  .platform-logos{flex-wrap:wrap;gap:12px}
+  .mockup-wrap{margin:40px 0 0}
+  .trust-bar{flex-direction:column;gap:16px;padding:24px 20px}
+  .trust-logos{flex-wrap:wrap;justify-content:center}
+  .stats{flex-wrap:wrap}
+  .stat{min-width:50%;border-bottom:1px solid var(--border)}
+  .sec,.sec-full{padding:80px 20px}
+  .dashboard-section{padding:80px 20px 60px}
+  .oss-grid,.hiw-steps{grid-template-columns:1fr}
+  .why-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .cost-grid{grid-template-columns:1fr;gap:20px}
+  .cost-vs{display:none}
+  .testi-grid{grid-template-columns:1fr;padding:0 20px}
+  .faq-grid{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:36px 20px}
+  .foot-links{flex-wrap:wrap;justify-content:center}
+  .fcta{padding:80px 20px}
+  .cost-bg{padding:80px 20px}
+  .testi-wrap{padding:80px 20px}
+  .testi-section-bg{padding:80px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<canvas id="particles"></canvas>
+
+<!-- AMBIENT GLOW ORBS -->
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="logo">
+    <div class="logo-mark">A</div>
+    <span class="logo-name">APEX</span>
+  </div>
+  <div class="nav-mid">
+    <a href="#features">Features</a>
+    <a href="#platforms">Platforms</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <a href="/login" class="btn-ghost">Log In</a>
+    <a href="/dashboard" class="btn-ghost" style="color:var(--green)">My Dashboard</a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle light/dark mode">&#9790;</button>
+    <a href="/signup" class="btn-cta" style="text-decoration:none">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-spotlight"></div>
+  <div class="hero-glow"></div>
+
+  <!-- FLOATING DECORATIVE ELEMENTS -->
+  <div class="hero-float-el hf-roas" data-parallax="0.08">
+    <div class="hf-label">Campaign ROAS</div>
+    <div class="hf-value"><span style="color:var(--green)">4.6x</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg></div>
+  </div>
+
+  <div class="hero-float-el hf-meta" data-parallax="0.12">
+    <div class="hf-icon" style="background:#1877F2;border-color:#1877F2">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.24.19 2.24.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7A10 10 0 0 0 22 12.06c0-5.53-4.5-10.02-10-10.02z" fill="#fff"/></svg>
+    </div>
+  </div>
+
+  <div class="hero-float-el hf-google" data-parallax="0.05">
+    <div class="hf-icon" style="background:#fff;border-color:#e0e0e0">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.02 10.02 0 0 0 2 12c0 1.61.39 3.14 1.07 4.49l3.77-2.4z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    </div>
+  </div>
+
+  <div class="hero-float-el hf-tiktok" data-parallax="0.15">
+    <div class="hf-icon" style="background:#000;border-color:#333">
+      <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.51a8.35 8.35 0 0 0 4.76 1.49V6.56a4.85 4.85 0 0 1-1-.13v.26z" fill="#fe2c55"/><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.51a8.35 8.35 0 0 0 4.76 1.49V6.56a4.85 4.85 0 0 1-1-.13v.26z" fill="#25F4EE" opacity="0.5" transform="translate(-1,-1)"/></svg>
+    </div>
+  </div>
+
+  <div class="hero-float-el hf-kill" data-parallax="0.1">
+    <div class="hf-label">AI Saved You</div>
+    <div class="hf-value" style="font-size:13px;color:var(--green)">$840 this week <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+  </div>
+
+  <div class="hero-float-el hf-chart" data-parallax="0.06">
+    <div style="display:flex;align-items:flex-end;gap:3px;height:28px">
+      <div style="width:5px;height:30%;background:rgba(16,185,129,0.35);border-radius:2px"></div>
+      <div style="width:5px;height:50%;background:rgba(16,185,129,0.4);border-radius:2px"></div>
+      <div style="width:5px;height:40%;background:rgba(16,185,129,0.38);border-radius:2px"></div>
+      <div style="width:5px;height:70%;background:rgba(16,185,129,0.5);border-radius:2px"></div>
+      <div style="width:5px;height:60%;background:rgba(16,185,129,0.45);border-radius:2px"></div>
+      <div style="width:5px;height:90%;background:rgba(16,185,129,0.7);border-radius:2px"></div>
+      <div style="width:5px;height:100%;background:var(--green);border-radius:2px"></div>
+    </div>
+  </div>
+
+  <div class="hero-float-el hf-live" data-parallax="0.2" style="border-radius:100px;display:flex;align-items:center;gap:6px">
+    <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s ease-in-out infinite"></span>
+    <span style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.5px">LIVE</span>
+  </div>
+
+  <!-- HERO CONTENT -->
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Meta + Google + TikTok — All in one platform
+    </div>
+    <h1><span class="hero-title-gradient">Smarter ads.</span><br><span class="shimmer-text">Zero guesswork.</span></h1>
+    <p class="hero-sub">Your AI-powered ad engine for Meta, Google, and TikTok. Competitor intelligence, auto-optimization, and a built-in lead pipeline — all from one dashboard.</p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn-hero" style="text-decoration:none;display:inline-block">Start Free — No Card Needed</a>
+      <button class="btn-hero-outline">Watch Demo</button>
+    </div>
+    <p class="hero-trust">Trusted by 3,200+ businesses &nbsp;&middot;&nbsp; $47M+ ad spend managed</p>
+
+    <!-- PLATFORM LOGOS -->
+    <div class="platform-logos">
+      <div class="platform-logo" style="animation-delay:0.4s">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.24.19 2.24.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7A10 10 0 0 0 22 12.06c0-5.53-4.5-10.02-10-10.02z" fill="#1877F2"/></svg>
+        <span>Meta</span>
+      </div>
+      <div class="platform-logo" style="animation-delay:0.55s">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.02 10.02 0 0 0 2 12c0 1.61.39 3.14 1.07 4.49l3.77-2.4z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <span>Google</span>
+      </div>
+      <div class="platform-logo" style="animation-delay:0.7s">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.51a8.35 8.35 0 0 0 4.76 1.49V6.56a4.85 4.85 0 0 1-1-.13v.26z" fill="#fe2c55"/><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.51a8.35 8.35 0 0 0 4.76 1.49V6.56a4.85 4.85 0 0 1-1-.13v.26z" fill="#25F4EE" opacity="0.5" transform="translate(-1,-1)"/></svg>
+        <span>TikTok</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD MOCKUP SECTION -->
+<div class="dashboard-section" id="dashboard-preview">
+  <div class="dashboard-section-inner">
+    <div class="sec-center reveal">
+      <span class="eyebrow">Product Preview</span>
+      <h2 class="sec-h">One dashboard. Every platform.</h2>
+      <p class="sec-p">Meta, Google, and TikTok campaigns — all managed, tracked, and optimized from a single view.</p>
+    </div>
+    <div class="mockup-wrap reveal">
+      <div class="mockup-blur-bot"></div>
+      <div class="dashboard">
+        <div class="db-topbar">
+          <div class="db-dots">
+            <div class="db-dot" style="background:#ff5f57"></div>
+            <div class="db-dot" style="background:#febc2e"></div>
+            <div class="db-dot" style="background:#34d399"></div>
+          </div>
+          <div class="db-title">APEX — Campaign Manager</div>
+          <div style="width:60px"></div>
+        </div>
+        <div class="db-tabs">
+          <div class="db-tab on" onclick="dbTab('all',this)">All Campaigns</div>
+          <div class="db-tab" onclick="dbTab('meta',this)">Meta</div>
+          <div class="db-tab" onclick="dbTab('google',this)">Google</div>
+          <div class="db-tab" onclick="dbTab('tiktok',this)">TikTok</div>
+          <div class="db-tab" onclick="dbTab('wanda',this)">Wanda AI</div>
+          <div class="db-tab" onclick="dbTab('pipeline',this)">Pipeline</div>
+          <div class="db-tab" onclick="dbTab('analytics',this)">Analytics</div>
+        </div>
+
+        <!-- ALL CAMPAIGNS -->
+        <div id="dbt-all" class="db-panel">
+          <div class="db-kpis">
+            <div class="db-kpi"><div class="db-kpi-label">Total Spend</div><div class="db-kpi-val">$14,280</div><div class="db-kpi-delta up">+18% vs last month</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Conversions</div><div class="db-kpi-val">2,841</div><div class="db-kpi-delta up">+31%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Avg. ROAS</div><div class="db-kpi-val">4.6x</div><div class="db-kpi-delta up">+0.9x</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Cost / Conv.</div><div class="db-kpi-val">$5.03</div><div class="db-kpi-delta up">-12%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Active Campaigns</div><div class="db-kpi-val">12</div><div class="db-kpi-delta" style="color:rgba(255,255,255,0.5)">3 platforms</div></div>
+          </div>
+          <div class="db-thead">
+            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Platform</div><div class="db-th">Budget</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+          </div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div><div class="db-td">Meta</div><div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td green">5.9x</div><div class="db-td">$3,240</div><div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:80%"></div><div class="spark-b" style="height:95%"></div><div class="spark-b" style="height:100%"></div></div></div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Brand Search | Exact Match</div><div class="db-ctype">Search · Smart Bidding · tCPA $12</div></div></div><div class="db-td">Google</div><div class="db-td">$120/day</div><div class="db-td green">441</div><div class="db-td green">5.1x</div><div class="db-td">$2,660</div><div class="spark"><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:90%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status learning"></div><div><div class="db-cname">UGC Creative Test — Round 4</div><div class="db-ctype">Conversions · Learning Phase</div></div></div><div class="db-td">TikTok</div><div class="db-td">$80/day</div><div class="db-td">112</div><div class="db-td">2.8x</div><div class="db-td">$960</div><div class="spark"><div class="spark-b" style="height:20%"></div><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:45%"></div><div class="spark-b" style="height:40%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:60%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic | Broad Audience</div><div class="db-ctype">Reach · Paused by APEX Kill Rule</div></div></div><div class="db-td">Meta</div><div class="db-td">—</div><div class="db-td dim">66</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div><div class="spark"><div class="spark-b" style="height:45%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:25%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:12%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:6%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:3%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div></div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX Kill Rule triggered — "Cold Traffic" paused (ROAS below 1.0x). Budget reallocated to top performer. Estimated +$840 recovered this week.</div><button class="db-apex-btn">View Details</button></div>
+        </div>
+
+        <!-- META -->
+        <div id="dbt-meta" class="db-panel" style="display:none">
+          <div class="db-kpis">
+            <div class="db-kpi"><div class="db-kpi-label">Spend (Meta)</div><div class="db-kpi-val">$6,420</div><div class="db-kpi-delta up">+14%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Results</div><div class="db-kpi-val">1,847</div><div class="db-kpi-delta up">+24%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Avg. ROAS</div><div class="db-kpi-val">4.2x</div><div class="db-kpi-delta up">+0.8x</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Cost / Result</div><div class="db-kpi-val">$3.48</div><div class="db-kpi-delta up">Improved</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Reach</div><div class="db-kpi-val">284K</div><div class="db-kpi-delta up">+11%</div></div>
+          </div>
+          <div class="db-thead">
+            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Budget</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+          </div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div><div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div><div class="spark"><div class="spark-b" style="height:40%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:75%"></div><div class="spark-b" style="height:88%"></div><div class="spark-b" style="height:95%"></div><div class="spark-b" style="height:100%"></div></div></div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike | Top Purchasers 1%</div><div class="db-ctype">Traffic · Manual CPC</div></div></div><div class="db-td">$80/day</div><div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div><div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:58%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:62%"></div><div class="spark-b" style="height:68%"></div><div class="spark-b" style="height:70%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status learning"></div><div><div class="db-cname">New Creative | Video Test</div><div class="db-ctype">Conversions · Learning Phase</div></div></div><div class="db-td">$60/day</div><div class="db-td">112</div><div class="db-td">$4.22</div><div class="db-td">2.8x</div><div class="db-td">$473</div><div class="spark"><div class="spark-b" style="height:20%"></div><div class="spark-b" style="height:35%"></div><div class="spark-b" style="height:42%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:60%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic | Broad Audience</div><div class="db-ctype">Reach · Paused by Kill Rule</div></div></div><div class="db-td">—</div><div class="db-td dim">66</div><div class="db-td red">$9.85</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div><div class="spark"><div class="spark-b" style="height:40%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:22%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:12%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:6%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:3%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div></div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX insight — "Spring Sale" ROAS is 5.9x. Recommend duplicating this ad set at 2x budget to capture peak performance window.</div><button class="db-apex-btn">Scale It</button></div>
+        </div>
+
+        <!-- GOOGLE -->
+        <div id="dbt-google" class="db-panel" style="display:none">
+          <div class="db-kpis">
+            <div class="db-kpi"><div class="db-kpi-label">Spend (Google)</div><div class="db-kpi-val">$4,810</div><div class="db-kpi-delta up">+22%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Conversions</div><div class="db-kpi-val">298</div><div class="db-kpi-delta up">+31%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Avg. ROAS</div><div class="db-kpi-val">4.4x</div><div class="db-kpi-delta up">+0.6x</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Clicks</div><div class="db-kpi-val">3,847</div><div class="db-kpi-delta up">+18%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Quality Score</div><div class="db-kpi-val">9.2</div><div class="db-kpi-delta up">Top 10%</div></div>
+          </div>
+          <div class="db-thead">
+            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Type</div><div class="db-th">Clicks</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+          </div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Brand Search | Exact Match</div><div class="db-ctype">Search · Smart Bidding · tCPA $12</div></div></div><div class="db-td">Search</div><div class="db-td green">1,284</div><div class="db-td green">142</div><div class="db-td green">5.1x</div><div class="db-td">$1,700</div><div class="spark"><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:62%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:88%"></div><div class="spark-b" style="height:95%"></div></div></div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Performance Max | All Products</div><div class="db-ctype">PMax · Maximize Conversions</div></div></div><div class="db-td">PMax</div><div class="db-td">1,891</div><div class="db-td green">97</div><div class="db-td green">3.8x</div><div class="db-td">$2,400</div><div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:72%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:82%"></div><div class="spark-b" style="height:85%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status learning"></div><div><div class="db-cname">Competitor Keywords | Non-Brand</div><div class="db-ctype">Search · Manual CPC · Budget Limited</div></div></div><div class="db-td">Search</div><div class="db-td">412</div><div class="db-td">38</div><div class="db-td">2.4x</div><div class="db-td">$710</div><div class="spark"><div class="spark-b" style="height:35%"></div><div class="spark-b" style="height:38%"></div><div class="spark-b" style="height:42%"></div><div class="spark-b" style="height:40%"></div><div class="spark-b" style="height:45%"></div><div class="spark-b" style="height:44%"></div></div></div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX insight — "Competitor Keywords" is budget-limited. Increasing by $30/day captures ~340 additional clicks. Est. +14 conversions/week.</div><button class="db-apex-btn">Increase Budget</button></div>
+        </div>
+
+        <!-- TIKTOK -->
+        <div id="dbt-tiktok" class="db-panel" style="display:none">
+          <div class="db-kpis">
+            <div class="db-kpi"><div class="db-kpi-label">Spend (TikTok)</div><div class="db-kpi-val">$3,050</div><div class="db-kpi-delta up">+38%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Conversions</div><div class="db-kpi-val">412</div><div class="db-kpi-delta up">+55%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Avg. ROAS</div><div class="db-kpi-val">3.9x</div><div class="db-kpi-delta up">+1.1x</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Impressions</div><div class="db-kpi-val">1.2M</div><div class="db-kpi-delta up">+42%</div></div>
+            <div class="db-kpi"><div class="db-kpi-label">Avg. Hook Rate</div><div class="db-kpi-val">38.2%</div><div class="db-kpi-delta up">Top 5%</div></div>
+          </div>
+          <div class="db-thead">
+            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Format</div><div class="db-th">IMPRESSIONS</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+          </div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">UGC Hook Testing | Round 4</div><div class="db-ctype">Video Views · Spark Ads</div></div></div><div class="db-td">Video</div><div class="db-td green">540K</div><div class="db-td green">218</div><div class="db-td green">4.4x</div><div class="db-td">$1,200</div><div class="spark"><div class="spark-b" style="height:45%"></div><div class="spark-b" style="height:58%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:82%"></div><div class="spark-b" style="height:92%"></div><div class="spark-b" style="height:100%"></div></div></div>
+          <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Retargeting | 75% Video Viewers</div><div class="db-ctype">Conversions · Custom Audience</div></div></div><div class="db-td">Video</div><div class="db-td">188K</div><div class="db-td green">141</div><div class="db-td green">3.9x</div><div class="db-td">$1,100</div><div class="spark"><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:68%"></div><div class="spark-b" style="height:72%"></div><div class="spark-b" style="height:75%"></div></div></div>
+          <div class="db-row"><div class="db-toggle off" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status learning"></div><div><div class="db-cname">Broad Interest | Cold Traffic</div><div class="db-ctype">Reach · Learning Phase</div></div></div><div class="db-td">TopView</div><div class="db-td">312K</div><div class="db-td">53</div><div class="db-td">1.8x</div><div class="db-td">$750</div><div class="spark"><div class="spark-b" style="height:25%"></div><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:35%"></div><div class="spark-b" style="height:38%"></div><div class="spark-b" style="height:42%"></div><div class="spark-b" style="height:45%"></div></div></div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX insight — "UGC Hook Testing" hook rate is 38.2% (top 5% of niche). Recommend scaling to 3x budget while performance is strong.</div><button class="db-apex-btn">Scale It</button></div>
+        </div>
+
+        <!-- WANDA AI -->
+        <div id="dbt-wanda" class="db-panel" style="display:none">
+          <div style="display:flex;flex-direction:column;height:340px">
+            <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px" id="wanda-msgs">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#34d399,#6ee7b7);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#080808;flex-shrink:0">W</div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:0 10px 10px 10px;padding:12px 14px;max-width:80%">
+                  <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.85)">Hey — I'm Wanda, your AI ad strategist. I can launch campaigns, analyze competitors, generate creatives, and optimize your spend across Meta, Google, and TikTok. What do you want to work on?</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;flex-direction:row-reverse">
+                <div style="width:28px;height:28px;border-radius:8px;background:#2a2a2a;border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);flex-shrink:0">You</div>
+                <div style="background:#1e1e1e;border:1px solid rgba(255,255,255,0.06);border-radius:10px 0 10px 10px;padding:12px 14px;max-width:80%">
+                  <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.85)">Analyze my top competitors and tell me what's working in my niche right now.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#34d399,#6ee7b7);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#080808;flex-shrink:0">W</div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:0 10px 10px 10px;padding:12px 14px;max-width:88%">
+                  <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.85)">Scanned <span style="color:#34d399;font-weight:600">847 active competitor ads</span> across Meta and TikTok. Here's what's crushing right now:<br><br>
+                  <span style="color:#34d399">1.</span> Problem-agitation hooks outperforming lifestyle by 3.2x<br>
+                  <span style="color:#34d399">2.</span> UGC-style video driving 41% lower CPL than polished creative<br>
+                  <span style="color:#34d399">3.</span> "$X in Y days" result claims dominating the feed<br><br>
+                  Want me to build a campaign around the top-performing angle?</div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:14px 20px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;align-items:center">
+              <input id="wanda-input" type="text" placeholder="Ask Wanda anything about your ads..." style="flex:1;background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;font-size:13px;color:#f0f0f5;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')wandaSend()"/>
+              <button onclick="wandaSend()" style="background:linear-gradient(135deg,#34d399,#6ee7b7);color:#080808;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PIPELINE -->
+        <div id="dbt-pipeline" class="db-panel" style="display:none">
+          <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.5)">Lead Pipeline &nbsp;<span style="color:#34d399;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:5px;padding:2px 8px;font-size:11px">48 active leads</span></div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.28)">Synced with CRM's</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.06);height:280px">
+            <div style="background:#0e0e22;padding:14px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:12px">Raw Leads <span style="color:#f0f0f5">18</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Sarah M.</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">Meta Lead Ad · $8,400 est.</div></div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">James T.</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">Google Search · $12,200 est.</div></div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Rivera Dental</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">TikTok Ad · $5,100 est.</div></div>
+              </div>
+            </div>
+            <div style="background:#0e0e22;padding:14px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:12px">Contacted <span style="color:#f0f0f5">14</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Apex Fitness Co.</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">Email sent · 2h ago</div></div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Mike R.</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">Sequence step 2 · 1d ago</div></div>
+              </div>
+            </div>
+            <div style="background:#0e0e22;padding:14px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:12px">Replied <span style="color:#f0f0f5">9</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="background:#121230;border:1px solid rgba(52,211,153,0.2);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Bella Med Spa</div><div style="font-size:11px;color:#34d399">Positive reply · AI classified</div></div>
+                <div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#f0f0f5">Downtown Law</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">Replied · needs follow-up</div></div>
+              </div>
+            </div>
+            <div style="background:#0e0e22;padding:14px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#34d399;margin-bottom:12px">Qualified <span style="color:#f0f0f5">7</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#34d399">Summit Roofing</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">$18,000 opp · Call booked</div></div>
+                <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:8px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:#34d399">GlowUp Aesthetics</div><div style="font-size:11px;color:rgba(255,255,255,0.5)">$9,500 opp · Demo scheduled</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX AI classified 3 new replies as positive interest. Moved to Qualified and synced to GHL. 2 follow-up sequences triggered automatically.</div><button class="db-apex-btn">View All</button></div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="dbt-analytics" class="db-panel" style="display:none">
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:14px">Spend by Platform — Last 30 Days</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#f0f0f5"><span>Meta</span><span style="color:#34d399;font-weight:600">$6,420 &nbsp;45%</span></div>
+                  <div style="height:6px;background:#121230;border-radius:3px"><div style="height:100%;width:45%;background:linear-gradient(90deg,#1877f2,#4a9aff);border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#f0f0f5"><span>Google</span><span style="color:#34d399;font-weight:600">$4,810 &nbsp;34%</span></div>
+                  <div style="height:6px;background:#121230;border-radius:3px"><div style="height:100%;width:34%;background:linear-gradient(90deg,#4285f4,#34a853);border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#f0f0f5"><span>TikTok</span><span style="color:#34d399;font-weight:600">$3,050 &nbsp;21%</span></div>
+                  <div style="height:6px;background:#121230;border-radius:3px"><div style="height:100%;width:21%;background:linear-gradient(90deg,#ff0050,#ff6699);border-radius:3px"></div></div>
+                </div>
+              </div>
+              <div style="margin-top:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:14px">ROAS by Platform</div>
+              <div style="display:flex;gap:10px">
+                <div style="flex:1;background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px">Meta</div>
+                  <div style="font-size:22px;font-weight:900;color:#4a9aff;letter-spacing:-1px">4.2x</div>
+                </div>
+                <div style="flex:1;background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px">Google</div>
+                  <div style="font-size:22px;font-weight:900;color:#34a853;letter-spacing:-1px">4.4x</div>
+                </div>
+                <div style="flex:1;background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center">
+                  <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px">TikTok</div>
+                  <div style="font-size:22px;font-weight:900;color:#ff6699;letter-spacing:-1px">3.9x</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);margin-bottom:14px">Total ROAS — Last 30 Days</div>
+              <div style="height:100px;display:flex;align-items:flex-end;gap:3px;margin-bottom:8px">
+                <div class="roas-bar" title="3.2x ROAS" style="flex:1;height:40%;background:rgba(52,211,153,0.3);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="3.5x ROAS" style="flex:1;height:50%;background:rgba(52,211,153,0.35);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="3.4x ROAS" style="flex:1;height:45%;background:rgba(52,211,153,0.35);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="3.9x ROAS" style="flex:1;height:60%;background:rgba(52,211,153,0.4);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="4.1x ROAS" style="flex:1;height:65%;background:rgba(52,211,153,0.4);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="3.8x ROAS" style="flex:1;height:58%;background:rgba(52,211,153,0.4);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="4.4x ROAS" style="flex:1;height:72%;background:rgba(52,211,153,0.5);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="4.7x ROAS" style="flex:1;height:78%;background:rgba(52,211,153,0.5);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="4.9x ROAS" style="flex:1;height:82%;background:rgba(52,211,153,0.55);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="4.8x ROAS" style="flex:1;height:80%;background:rgba(52,211,153,0.55);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="5.2x ROAS" style="flex:1;height:88%;background:rgba(52,211,153,0.65);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="5.5x ROAS" style="flex:1;height:92%;background:rgba(52,211,153,0.7);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="5.4x ROAS" style="flex:1;height:90%;background:rgba(52,211,153,0.7);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="5.8x ROAS" style="flex:1;height:95%;background:rgba(52,211,153,0.75);border-radius:2px 2px 0 0"></div>
+                <div class="roas-bar" title="6.1x ROAS" style="flex:1;height:100%;background:#34d399;border-radius:2px 2px 0 0"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.28)"><span>Mar 1</span><span>Mar 15</span><span>Mar 25</span></div>
+              <div style="margin-top:16px;background:#121230;border:1px solid rgba(52,211,153,0.15);border-radius:10px;padding:14px">
+                <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px">Best performing day</div>
+                <div style="font-size:20px;font-weight:900;color:#34d399">Mar 25 &nbsp;<span style="font-size:14px">6.1x ROAS</span></div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">$880 spend → $5,368 revenue</div>
+              </div>
+            </div>
+          </div>
+          <div class="db-apex-row"><div class="db-apex-msg">APEX report — TikTok ROAS improved 1.1x this month. Google Quality Score ranked top 10% in your niche. Overall blended ROAS: 4.6x.</div><button class="db-apex-btn">Full Report</button></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="inline-cta reveal">
+  <p>See what APEX can do for your business.</p>
+  <div class="inline-cta-actions">
+    <a href="/signup" class="btn-hero" style="text-decoration:none;display:inline-block">Start Free — No Card Needed</a>
+    <button class="btn-hero-outline">Book a Demo</button>
+  </div>
+</div>
+
+<!-- INDUSTRIES TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="t-dot"></span>
+    <div class="t-item">Real Estate</div><span class="t-sep">/</span>
+    <div class="t-item">Law Firms</div><span class="t-sep">/</span>
+    <div class="t-item">Restaurants</div><span class="t-sep">/</span>
+    <div class="t-item">Med Spas</div><span class="t-sep">/</span>
+    <div class="t-item">E-Commerce</div><span class="t-sep">/</span>
+    <div class="t-item">Gyms &amp; Fitness</div><span class="t-sep">/</span>
+    <div class="t-item">Contractors</div><span class="t-sep">/</span>
+    <div class="t-item">Dental Practices</div><span class="t-sep">/</span>
+    <div class="t-item">Auto Dealers</div><span class="t-sep">/</span>
+    <div class="t-item">Insurance</div><span class="t-sep">/</span>
+    <div class="t-item">Retail Stores</div><span class="t-sep">/</span>
+    <div class="t-item">Financial Services</div><span class="t-sep">/</span>
+    <div class="t-item">Home Services</div><span class="t-sep">/</span>
+    <div class="t-item">Education</div><span class="t-sep">/</span>
+    <div class="t-item">Healthcare</div><span class="t-sep">/</span>
+    <!-- duplicate -->
+    <span class="t-dot"></span>
+    <div class="t-item">Real Estate</div><span class="t-sep">/</span>
+    <div class="t-item">Law Firms</div><span class="t-sep">/</span>
+    <div class="t-item">Restaurants</div><span class="t-sep">/</span>
+    <div class="t-item">Med Spas</div><span class="t-sep">/</span>
+    <div class="t-item">E-Commerce</div><span class="t-sep">/</span>
+    <div class="t-item">Gyms &amp; Fitness</div><span class="t-sep">/</span>
+    <div class="t-item">Contractors</div><span class="t-sep">/</span>
+    <div class="t-item">Dental Practices</div><span class="t-sep">/</span>
+    <div class="t-item">Auto Dealers</div><span class="t-sep">/</span>
+    <div class="t-item">Insurance</div><span class="t-sep">/</span>
+    <div class="t-item">Retail Stores</div><span class="t-sep">/</span>
+    <div class="t-item">Financial Services</div><span class="t-sep">/</span>
+    <div class="t-item">Home Services</div><span class="t-sep">/</span>
+    <div class="t-item">Education</div><span class="t-sep">/</span>
+    <div class="t-item">Healthcare</div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+<!-- STATS BAR -->
+<div class="stats reveal">
+  <div class="stat">
+    <div class="stat-n" data-count="3200" data-suffix="+">0</div>
+    <div class="stat-l">Businesses powered</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" data-prefix="$" data-count="47" data-suffix="M+">$0</div>
+    <div class="stat-l">Ad spend managed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" data-count="4.6" data-suffix="x" data-decimal="1">0</div>
+    <div class="stat-l">Average ROAS</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n" data-count="15" data-suffix=" min">0</div>
+    <div class="stat-l">AI optimization cycle</div>
+  </div>
+</div>
+
+<!-- ONE STOP SHOP -->
+<section class="sec" id="features">
+  <div class="sec-center reveal">
+    <span class="eyebrow">Your One-Stop Shop</span>
+    <h2 class="sec-h">Everything your ads need.<br>In one place.</h2>
+    <p class="sec-p">Stop bouncing between Meta, Google, TikTok, your CRM, and your agency. APEX runs the whole operation — and does it better.</p>
+  </div>
+  <div class="oss-grid reveal stagger-in">
+    <div class="oss-card">
+      <div class="oss-num">01 — Launch</div>
+      <div class="oss-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3>Talk to Wanda. Go live in minutes.</h3>
+      <p>Tell Wanda your niche, location, and goal. She analyzes your competitors, builds the campaign, generates ad creatives, and launches — across all three platforms.</p>
+    </div>
+    <div class="oss-card">
+      <div class="oss-num">02 — Track</div>
+      <div class="oss-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <h3>One dashboard for Meta, Google, and TikTok.</h3>
+      <p>Every campaign, every platform, every metric in a single view. APEX logs every AI decision in plain English so you always know why something changed.</p>
+    </div>
+    <div class="oss-card">
+      <div class="oss-num">03 — Optimize</div>
+      <div class="oss-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>AI optimizes every 15 minutes. 24/7.</h3>
+      <p>Kill rules pause losers. Budget shifts to winners. APEX runs around the clock so your ads never sit bleeding while you sleep. Set it once — let it run.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sec-divider"></div>
+<!-- HOW IT WORKS -->
+<div class="hiw-bg">
+  <div class="sec-full sec-center">
+    <span class="eyebrow">How It Works</span>
+    <h2 class="sec-h" style="max-width:560px;margin:0 auto 14px">From zero to scaling campaigns in 3 steps.</h2>
+  </div>
+  <div class="hiw-steps reveal stagger-in" style="padding:0 48px 48px;margin-top:0">
+    <div class="hiw-step">
+      <div class="step-n">01</div>
+      <h3>Connect Your Accounts</h3>
+      <p>Link Meta, Google Ads, and TikTok in one click. APEX pulls in your existing campaigns and instantly runs a full AI audit on your account performance.</p>
+    </div>
+    <div class="hiw-step">
+      <div class="step-n">02</div>
+      <h3>Tell Wanda What You Want</h3>
+      <p>Describe your business, target audience, and goal. Wanda scans your competitors' active ads, builds your campaign strategy, and generates creatives in seconds.</p>
+    </div>
+    <div class="hiw-step">
+      <div class="step-n">03</div>
+      <h3>Let APEX Scale It</h3>
+      <p>AI optimizes every 15 minutes — pausing losers, scaling winners, and shifting budget automatically. Leads flow into your built-in pipeline. You just watch the results.</p>
+    </div>
+  </div>
+</div>
+
+<div class="inline-cta reveal">
+  <p>Ready to launch smarter campaigns?</p>
+  <div class="inline-cta-actions">
+    <a href="/signup" class="btn-hero" style="text-decoration:none;display:inline-block">Get Started Free</a>
+  </div>
+</div>
+
+<!-- PLATFORMS -->
+<section class="sec" id="platforms" style="max-width:100%;padding:48px 48px">
+  <div style="max-width:1160px;margin:0 auto">
+    <div class="sec-center reveal">
+      <span class="eyebrow">Platforms</span>
+      <h2 class="sec-h">Meta. Google. TikTok.<br>All managed by APEX.</h2>
+      <p class="sec-p">Other tools manage one platform. APEX manages all three — with the same AI intelligence, the same kill rules, and the same unified dashboard.</p>
+    </div>
+    <div class="platform-tabs">
+      <button class="ptab on" onclick="switchPlatform('meta',this)">Meta Ads</button>
+      <button class="ptab" onclick="switchPlatform('google',this)">Google Ads</button>
+      <button class="ptab" onclick="switchPlatform('tiktok',this)">TikTok Ads</button>
+    </div>
+
+    <!-- META -->
+    <div class="platform-section active" id="ps-meta">
+      <div class="dashboard reveal">
+        <div class="db-topbar">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:26px;height:26px;background:#1877f2;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff">f</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85)">Meta Ads Manager</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.5)">My Business — Act_283940123</div>
+            </div>
+          </div>
+          <div class="db-live"><span class="db-live-dot"></span> APEX Live</div>
+        </div>
+        <div class="db-kpis">
+          <div class="db-kpi"><div class="db-kpi-label">Results</div><div class="db-kpi-val">1,847</div><div class="db-kpi-delta up">+24%</div></div>
+          <div class="db-kpi"><div class="db-kpi-label">Reach</div><div class="db-kpi-val">284K</div><div class="db-kpi-delta up">+11%</div></div>
+          <div class="db-kpi"><div class="db-kpi-label">Spend</div><div class="db-kpi-val">$6,420</div><div class="db-kpi-delta down">-3%</div></div>
+          <div class="db-kpi"><div class="db-kpi-label">Cost / Result</div><div class="db-kpi-val">$3.48</div><div class="db-kpi-delta up">Improved</div></div>
+          <div class="db-kpi"><div class="db-kpi-label">ROAS</div><div class="db-kpi-val">4.2x</div><div class="db-kpi-delta up">+0.8x</div></div>
+        </div>
+        <div class="db-thead">
+          <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Budget</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+        </div>
+        <div class="db-row">
+          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div>
+          <div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div>
+          <div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:100%"></div><div class="spark-b" style="height:95%"></div></div>
+        </div>
+        <div class="db-row">
+          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike | Top Purchasers 1%</div><div class="db-ctype">Traffic · Manual CPC</div></div></div>
+          <div class="db-td">$80/day</div><div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div>
+          <div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div></div>
+        </div>
+        <div class="db-row">
+          <div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic — Broad</div><div class="db-ctype">Reach · Paused by APEX Kill Rule</div></div></div>
+          <div class="db-td">—</div><div class="db-td dim">66</div><div class="db-td red">$9.85</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div>
+          <div class="spark"><div class="spark-b" style="height:40%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:25%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:15%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:8%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:4%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div>
+        </div>
+        <div class="db-apex-row">
+          <div class="db-apex-msg">APEX Kill Rule triggered — "Cold Traffic" paused. CPR exceeded $8.00 threshold. Budget reallocated to top performer.</div>
+          <button class="db-apex-btn">Apply Fix</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOOGLE -->
+    <div class="platform-section" id="ps-google">
+      <div class="google-ui reveal">
+        <div class="g-topbar">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="g-logo"><div class="g-g" style="background:#4285f4;color:#fff">G</div></div>
+            <span class="g-name">Google Ads</span>
+            <span class="g-account">— My Business &nbsp;·&nbsp; Customer ID: 831-294-7401</span>
+          </div>
+          <div class="db-live"><span class="db-live-dot"></span> APEX Live</div>
+        </div>
+        <div class="g-tabs">
+          <div class="g-tab on">Campaigns</div><div class="g-tab">Ad Groups</div><div class="g-tab">Keywords</div><div class="g-tab">Audiences</div><div class="g-tab">Bidding</div><div class="g-tab">Insights</div>
+        </div>
+        <div class="g-kpis">
+          <div class="g-kpi"><div class="g-kpi-l">Impressions</div><div class="g-kpi-v">94.2K</div><div class="g-kpi-d up">+18%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">Clicks</div><div class="g-kpi-v">3,847</div><div class="g-kpi-d up">+22%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">Conversions</div><div class="g-kpi-v">298</div><div class="g-kpi-d up">+31%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">Cost / Conv.</div><div class="g-kpi-v">$14.20</div><div class="g-kpi-d up">Improved</div></div>
+        </div>
+        <div class="g-chart">
+          <div class="g-chart-l">Conversions — Last 30 Days</div>
+          <div class="g-bars">
+            <div class="g-bar" style="height:35%;background:#4285f4;opacity:.5"></div>
+            <div class="g-bar" style="height:45%;background:#4285f4;opacity:.55"></div>
+            <div class="g-bar" style="height:42%;background:#4285f4;opacity:.6"></div>
+            <div class="g-bar" style="height:55%;background:#4285f4;opacity:.6"></div>
+            <div class="g-bar" style="height:60%;background:#4285f4;opacity:.65"></div>
+            <div class="g-bar" style="height:58%;background:#4285f4;opacity:.65"></div>
+            <div class="g-bar" style="height:68%;background:#4285f4;opacity:.7"></div>
+            <div class="g-bar" style="height:72%;background:#4285f4;opacity:.7"></div>
+            <div class="g-bar" style="height:78%;background:#4285f4;opacity:.75"></div>
+            <div class="g-bar" style="height:82%;background:#4285f4;opacity:.75"></div>
+            <div class="g-bar" style="height:75%;background:#4285f4;opacity:.8"></div>
+            <div class="g-bar" style="height:88%;background:#34a853;opacity:.8"></div>
+            <div class="g-bar" style="height:92%;background:#34a853;opacity:.85"></div>
+            <div class="g-bar" style="height:90%;background:#34a853;opacity:.85"></div>
+            <div class="g-bar" style="height:95%;background:#34a853;opacity:.9"></div>
+            <div class="g-bar" style="height:100%;background:#34a853"></div>
+            <div class="g-bar" style="height:98%;background:#34a853"></div>
+            <div class="g-bar" style="height:96%;background:#34a853"></div>
+            <div class="g-bar" style="height:100%;background:#34a853"></div>
+            <div class="g-bar" style="height:98%;background:#34a853"></div>
+          </div>
+        </div>
+        <div class="g-thead">
+          <div class="g-th">Campaign</div><div class="g-th">Status</div><div class="g-th">Clicks</div><div class="g-th">Conv.</div><div class="g-th">ROAS</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">Brand Search | Exact Match</div><div class="g-rtype">Search · Smart Bidding · tCPA $12</div></div>
+          <div><span class="g-status en">Enabled</span></div>
+          <div class="g-td">1,284</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">142</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">5.1x</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">Performance Max | All Products</div><div class="g-rtype">PMax · Maximize Conversions</div></div>
+          <div><span class="g-status en">Enabled</span></div>
+          <div class="g-td">1,891</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">97</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">3.8x</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">Competitor Keywords | Non-Brand</div><div class="g-rtype">Search · Manual CPC · 48 keywords</div></div>
+          <div><span class="g-status li">Budget Limited</span></div>
+          <div class="g-td">412</div>
+          <div class="g-td dim">38</div>
+          <div class="g-td dim">2.4x</div>
+        </div>
+        <div class="g-apex">
+          <div class="g-apex-t">APEX insight — "Competitor Keywords" is budget-limited. Increasing daily budget by $30 captures ~340 additional clicks per week. Estimated +14 conversions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIKTOK -->
+    <div class="platform-section" id="ps-tiktok">
+      <div class="google-ui reveal" style="background:#0d0d0d;border-color:rgba(255,255,255,0.08)">
+        <div class="g-topbar" style="background:#161616">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:26px;height:26px;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff">T</div>
+            <span class="g-name">TikTok Ads Manager</span>
+            <span class="g-account">— My Business</span>
+          </div>
+          <div class="db-live"><span class="db-live-dot"></span> APEX Live</div>
+        </div>
+        <div class="g-kpis" style="background:#0d0d0d">
+          <div class="g-kpi"><div class="g-kpi-l">Impressions</div><div class="g-kpi-v">1.2M</div><div class="g-kpi-d up">+42%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">Clicks</div><div class="g-kpi-v">8,910</div><div class="g-kpi-d up">+18%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">Conversions</div><div class="g-kpi-v">412</div><div class="g-kpi-d up">+55%</div></div>
+          <div class="g-kpi"><div class="g-kpi-l">CPC</div><div class="g-kpi-v">$0.62</div><div class="g-kpi-d up">-28%</div></div>
+        </div>
+        <div class="g-thead">
+          <div class="g-th">Campaign</div><div class="g-th">Status</div><div class="g-th">Impressions</div><div class="g-th">Conv.</div><div class="g-th">ROAS</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">UGC Creative — Hook Testing</div><div class="g-rtype">Video Views · Auction · Spark Ads</div></div>
+          <div><span class="g-status en">Active</span></div>
+          <div class="g-td">540K</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">218</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">4.4x</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">Retargeting — Video Watchers 75%</div><div class="g-rtype">Conversions · Custom Audience</div></div>
+          <div><span class="g-status en">Active</span></div>
+          <div class="g-td">188K</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">141</div>
+          <div class="g-td" style="color:#81c995;font-weight:600">3.9x</div>
+        </div>
+        <div class="g-row">
+          <div><div class="g-rname">Broad Interest | Cold Traffic</div><div class="g-rtype">Reach · Learning Phase</div></div>
+          <div><span class="g-status li">Learning</span></div>
+          <div class="g-td">312K</div>
+          <div class="g-td dim">53</div>
+          <div class="g-td dim">1.8x</div>
+        </div>
+        <div class="g-apex">
+          <div class="g-apex-t">APEX insight — "UGC Creative" Hook Rate: 38.2% (top 5% of niche). Recommend duplicating this ad set with 3x budget to scale while performance is strong.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-divider"></div>
+<!-- WHY APEX -->
+<div class="why-section-bg">
+  <section class="sec">
+    <div class="sec-center reveal">
+      <span class="eyebrow">Why APEX</span>
+      <h2 class="sec-h">Built different.<br>In every way that matters.</h2>
+    </div>
+    <div class="why-grid reveal stagger-in">
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <h3>Precision Competitor Intelligence</h3>
+        <p>APEX scans thousands of active ads across every platform in your market. You'll know exactly what creatives, offers, and angles are working before you spend a dollar.</p>
+        <div class="why-tag">APEX: deep intel across 3 platforms</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <h3>Three Platforms. One Dashboard.</h3>
+        <p>Meta, Google, and TikTok — all managed from one place. Traditional agencies juggle logins and spreadsheets. APEX runs your full paid media operation without the tab-switching.</p>
+        <div class="why-tag red">Other tools: usually one platform only</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Full Lead Pipeline Built In</h3>
+        <p>Leads from your ads flow directly into a built-in CRM pipeline — Raw, Contacted, Replied, Qualified. No third-party CRM required. GHL sync included on Growth plan.</p>
+        <div class="why-tag red">Traditional agencies: no pipeline included</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Transparent Pricing. No Surprises.</h3>
+        <p>$497/mo gets you started. $997/mo gets you everything. No hidden fees, no percentage of ad spend, no surprise invoices. What you see is what you pay.</p>
+        <div class="why-tag red">Agencies: $3K+ retainer + % of spend</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- TESTIMONIAL (MAIN) -->
+<div class="testi-wrap reveal">
+  <p class="testi-quote">"APEX is the tool I wish I had when I started. We manage Meta, Google, and TikTok from one place — and the <em>AI kill rules alone saved us over $4,000 in wasted spend</em> in the first month."</p>
+  <div class="testi-author">
+    <div class="testi-avatar">J</div>
+    <div>
+      <div class="testi-name">Jordan Hayes</div>
+      <div class="testi-role">Founder, Hayes Performance Marketing &nbsp;·&nbsp; $2.4M+ managed</div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+<!-- COST COMPARISON -->
+<div class="cost-bg">
+  <div class="cost-inner">
+    <div class="sec-center reveal">
+      <span class="eyebrow">The Math</span>
+      <h2 class="sec-h">What you're paying now<br>vs. what you could be paying.</h2>
+      <p class="sec-p">Most businesses are bleeding money across agencies, tools, and platforms they don't need. Here's the real cost.</p>
+    </div>
+    <div class="cost-grid reveal">
+      <div class="cost-col old">
+        <div class="cost-item"><span class="cost-label">Ad agency retainer</span><span class="cost-price red">$3,000/mo</span></div>
+        <div class="cost-item"><span class="cost-label">Agency % of ad spend (15%)</span><span class="cost-price red">$1,500/mo</span></div>
+        <div class="cost-item"><span class="cost-label">CRM / lead management</span><span class="cost-price red">$297/mo</span></div>
+        <div class="cost-item"><span class="cost-label">Competitor research tool</span><span class="cost-price red">$149/mo</span></div>
+        <div class="cost-item"><span class="cost-label">Creative / copywriting tool</span><span class="cost-price red">$99/mo</span></div>
+        <div class="cost-item"><span class="cost-label">Reporting dashboard</span><span class="cost-price red">$79/mo</span></div>
+        <div class="cost-total">
+          <span class="cost-total-label">Total / month</span>
+          <span class="cost-total-price red">$5,124</span>
+        </div>
+      </div>
+      <div class="cost-vs"><div class="cost-vs-badge">vs</div></div>
+      <div class="cost-col new">
+        <div class="cost-item"><span class="cost-label">AI ad management (all 3 platforms)</span><span class="cost-price" style="color:var(--green)">Included</span></div>
+        <div class="cost-item"><span class="cost-label">% of ad spend</span><span class="cost-price" style="color:var(--green)">$0</span></div>
+        <div class="cost-item"><span class="cost-label">Built-in lead pipeline + CRM</span><span class="cost-price" style="color:var(--green)">Included</span></div>
+        <div class="cost-item"><span class="cost-label">Competitor intelligence (1,000+ ads)</span><span class="cost-price" style="color:var(--green)">Included</span></div>
+        <div class="cost-item"><span class="cost-label">Wanda AI creative assistant</span><span class="cost-price" style="color:var(--green)">Included</span></div>
+        <div class="cost-item"><span class="cost-label">Unified analytics dashboard</span><span class="cost-price" style="color:var(--green)">Included</span></div>
+        <div class="cost-total">
+          <span class="cost-total-label">Total / month</span>
+          <span class="cost-total-price green">$997</span>
+        </div>
+      </div>
+    </div>
+    <div class="cost-savings reveal">
+      <div class="cost-savings-n">Save $4,127/mo</div>
+      <div class="cost-savings-l">That's $49,524 per year back in your pocket — and better results.</div>
+    </div>
+  </div>
+</div>
+
+<div class="inline-cta reveal">
+  <p>Stop overpaying. Start scaling.</p>
+  <div class="inline-cta-actions">
+    <a href="/signup" class="btn-hero" style="text-decoration:none;display:inline-block">Start Your Free Trial</a>
+    <button class="btn-hero-outline">See Pricing</button>
+  </div>
+</div>
+
+<!-- MORE TESTIMONIALS -->
+<div class="testi-section-bg">
+  <div class="sec-center reveal" style="padding:0 48px;margin-bottom:48px">
+    <span class="eyebrow">Real Results</span>
+    <h2 class="sec-h">Businesses like yours.<br>Results that speak.</h2>
+  </div>
+  <div class="testi-grid reveal stagger-in">
+    <div class="testi-card">
+      <div class="testi-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-card-text">"We fired our agency after week one. APEX does everything they did — <em>across three platforms instead of one</em> — for a fraction of the cost. Our ROAS went from 2.1x to 4.8x in 30 days."</p>
+      <div class="testi-card-foot">
+        <div class="testi-card-avatar">M</div>
+        <div>
+          <div class="testi-card-name">Marcus Rivera</div>
+          <div class="testi-card-role">Owner, Rivera Dental Group</div>
+        </div>
+      </div>
+      <div class="testi-card-ind">Dental / Healthcare</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-card-text">"The kill rules are a game changer. I used to lose $500-800/week on underperforming ads before I caught them. <em>APEX catches them in 15 minutes.</em> That alone pays for the subscription."</p>
+      <div class="testi-card-foot">
+        <div class="testi-card-avatar">S</div>
+        <div>
+          <div class="testi-card-name">Sarah Chen</div>
+          <div class="testi-card-role">Founder, GlowUp Aesthetics</div>
+        </div>
+      </div>
+      <div class="testi-card-ind">Med Spa / Beauty</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-card-text">"I know nothing about ads. Told Wanda my business, my city, and my budget. <em>Had campaigns running on Meta and Google in under 10 minutes.</em> Booked 14 jobs the first week."</p>
+      <div class="testi-card-foot">
+        <div class="testi-card-avatar">D</div>
+        <div>
+          <div class="testi-card-name">Derek Owens</div>
+          <div class="testi-card-role">Owner, Summit Roofing Co.</div>
+        </div>
+      </div>
+      <div class="testi-card-ind">Home Services / Contractors</div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+<!-- PRICING -->
+<div class="pricing-bg" id="pricing">
+  <section class="sec">
+    <div class="sec-center reveal">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="sec-h">Simple pricing.<br>No hidden fees.</h2>
+      <p class="sec-p">One flat monthly rate. No percentage of ad spend. No per-seat charges. No surprises.</p>
+    </div>
+    <div class="pricing-grid reveal stagger-in">
+      <div class="p-card">
+        <div class="p-tier">Starter</div>
+        <div class="p-price">
+          <span class="p-dollar">$</span>
+          <span class="p-num">497</span>
+          <span class="p-per">/mo</span>
+        </div>
+        <p class="p-desc">For businesses running ads on 1-2 platforms who are ready to start scaling with AI.</p>
+        <div class="p-divider"></div>
+        <ul class="p-feats">
+          <li>Meta + Google (choose 2 platforms)</li>
+          <li>AI competitor intelligence</li>
+          <li>Wanda AI creative assistant</li>
+          <li>AI kill rules + optimization</li>
+          <li>Lead pipeline (up to 500 leads/mo)</li>
+          <li>Up to $50K/mo ad spend managed</li>
+          <li>Email support</li>
+        </ul>
+        <button class="p-btn line">Get Started</button>
+      </div>
+      <div class="p-card hot">
+        <div class="p-badge">Most Popular</div>
+        <div class="p-tier">Growth</div>
+        <div class="p-price">
+          <span class="p-dollar">$</span>
+          <span class="p-num g">997</span>
+          <span class="p-per">/mo</span>
+        </div>
+        <p class="p-desc">For scaling businesses that need full-funnel coverage across all three platforms.</p>
+        <div class="p-divider"></div>
+        <ul class="p-feats">
+          <li>Meta + Google + TikTok</li>
+          <li>Deep competitor intelligence (1,000+ ads)</li>
+          <li>Wanda AI — unlimited creatives</li>
+          <li>Advanced kill rules + auto budget shifting</li>
+          <li>Full lead pipeline + cold email automation</li>
+          <li>GHL / CRM sync</li>
+          <li>Unlimited ad spend managed</li>
+          <li>Priority support + onboarding call</li>
+        </ul>
+        <a href="/signup" class="p-btn solid" style="text-decoration:none;display:inline-block">Start Free Trial</a>
+      </div>
+      <div class="p-card">
+        <div class="p-tier">Agency</div>
+        <div class="p-price">
+          <span class="p-num" style="font-size:42px;letter-spacing:-2px">Custom</span>
+        </div>
+        <p class="p-desc">For agencies managing multiple client accounts that need white-label capabilities.</p>
+        <div class="p-divider"></div>
+        <ul class="p-feats">
+          <li>Everything in Growth</li>
+          <li>White-label client portal</li>
+          <li>Unlimited client accounts</li>
+          <li>Client-facing reporting dashboard</li>
+          <li>Dedicated account manager</li>
+          <li>Custom API integrations</li>
+          <li>SLA + premium support</li>
+        </ul>
+        <button class="p-btn line">Contact Sales</button>
+      </div>
+    </div>
+    <p class="pricing-note reveal">No contracts. Cancel anytime. <span>14-day free trial included</span> — no credit card required.</p>
+  </section>
+</div>
+
+<div class="sec-divider"></div>
+<!-- FAQ -->
+<section class="sec">
+  <div class="sec-center reveal">
+    <span class="eyebrow">Questions</span>
+    <h2 class="sec-h">Everything you need to know.</h2>
+  </div>
+  <div class="faq-grid reveal stagger-in">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Does this work for my industry?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">APEX works for any business that runs paid ads — local services, e-commerce, SaaS, healthcare, real estate, restaurants, law firms, you name it. If you advertise on Meta, Google, or TikTok, APEX manages it.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Do I need to know how to run ads?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">No. That's the whole point. Tell Wanda your business, audience, and goal — she builds the campaigns, generates creatives, and manages everything. You just approve and watch the results.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I keep my existing campaigns?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">Absolutely. When you connect your ad accounts, APEX imports your existing campaigns and runs an instant AI audit. It won't touch anything until you tell it to — and every change is logged in plain English.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How is this different from hiring an agency?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">Agencies charge $3-5K/mo plus a % of your ad spend, manage one platform (maybe two), and optimize weekly at best. APEX manages all three platforms, optimizes every 15 minutes, and costs a flat $497-997/mo with zero percentage fees.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">What if I only run ads on one platform?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">The Starter plan covers 1-2 platforms. But most businesses find they're leaving money on the table by only running on one. APEX makes it easy to expand — Wanda handles the setup across all three.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I cancel anytime?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">Yes. No contracts, no commitments, no cancellation fees. You get a 14-day free trial to start — no credit card required. If it's not for you, you walk away with zero risk.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How fast will I see results?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">Most businesses see improvements within the first week. The AI starts optimizing immediately — pausing waste, reallocating budget, and surfacing what's working. The longer it runs, the smarter it gets.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Does APEX replace my CRM?<span class="faq-arrow">+</span></div>
+      <div class="faq-a">APEX has a built-in lead pipeline for tracking ad-generated leads. If you already use GHL or another CRM, it syncs directly — so you get the best of both without switching tools.</div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<div class="guarantee reveal">
+  <div class="guarantee-icon">&#x1f6e1;</div>
+  <h3>14-Day Free Trial. No Risk. No Card.</h3>
+  <p>Try APEX for 14 days — full access, all features, no credit card. If you don't see the value, you don't pay. We're that confident because the results speak for themselves. Over 3,200 businesses already made the switch.</p>
+</div>
+
+<!-- FINAL CTA -->
+<section class="fcta">
+  <div class="fcta-glow"></div>
+  <div class="reveal">
+    <span class="eyebrow" style="justify-content:center;display:block">Get Started Today</span>
+    <h2>Stop paying agencies.<br>Start running <span class="shimmer-text">smarter ads.</span></h2>
+    <p>AI-powered ad management across Meta, Google, and TikTok — with competitor intelligence, kill rules, and a built-in lead pipeline. Set it up in 5 minutes.</p>
+    <div class="fcta-actions">
+      <a href="/signup" class="btn-hero" style="text-decoration:none;display:inline-block">Start Free Trial — No Card Needed</a>
+      <button class="btn-hero-outline">Book a Demo</button>
+    </div>
+    <p class="fcta-trust">Trusted by 3,200+ businesses &nbsp;&middot;&nbsp; $47M+ ad spend managed &nbsp;&middot;&nbsp; 4.9/5 avg. rating</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">
+    <div class="foot-mark">A</div>
+    <span class="foot-name">APEX</span>
+    <span class="foot-by">by Backend Branding</span>
+  </div>
+  <div class="foot-links">
+    <a href="#">Features</a>
+    <a href="#">Pricing</a>
+    <a href="#">Integrations</a>
+    <a href="#">Support</a>
+    <a href="#">Privacy</a>
+  </div>
+  <div class="foot-copy">&copy; 2026 APEX by Backend Branding. All rights reserved.</div>
+</footer>
+
+<script>
+// ─── PARTICLE SYSTEM ───
+(function(){
+  const c = document.getElementById('particles');
+  const ctx = c.getContext('2d');
+  let w, h, particles = [];
+  const COUNT = 120;
+
+  function resize(){
+    w = c.width = window.innerWidth;
+    h = c.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor(){this.reset(true)}
+    reset(init){
+      this.x = Math.random() * w;
+      this.y = init ? Math.random() * h : -10;
+      this.size = Math.random() * 2.5 + 0.5;
+      this.speedY = Math.random() * 0.2 + 0.05;
+      this.speedX = (Math.random() - 0.5) * 0.15;
+      this.opacity = Math.random() * 0.7 + 0.3;
+      this.pulse = Math.random() * Math.PI * 2;
+      this.pulseSpeed = Math.random() * 0.015 + 0.008;
+      this.isGreen = Math.random() > 0.3;
+    }
+    update(){
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.pulse += this.pulseSpeed;
+      if(this.y > h + 10 || this.x < -10 || this.x > w + 10) this.reset(false);
+    }
+    draw(){
+      const o = this.opacity * (0.5 + 0.5 * Math.sin(this.pulse));
+      const isDark = document.documentElement.classList.contains('dark');
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      if(this.isGreen){
+        ctx.fillStyle = isDark ? `rgba(52,211,153,${o})` : `rgba(0,160,70,${o * 0.7})`;
+      } else {
+        ctx.fillStyle = isDark ? `rgba(255,255,255,${o * 0.8})` : `rgba(0,130,60,${o * 0.4})`;
+      }
+      ctx.fill();
+      // glow
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+      if(this.isGreen){
+        ctx.fillStyle = isDark ? `rgba(52,211,153,${o * 0.15})` : `rgba(0,160,70,${o * 0.08})`;
+      } else {
+        ctx.fillStyle = isDark ? `rgba(52,211,153,${o * 0.06})` : `rgba(0,130,60,${o * 0.04})`;
+      }
+      ctx.fill();
+    }
+  }
+
+  for(let i = 0; i < COUNT; i++) particles.push(new Particle());
+
+  function animate(){
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ─── THEME TOGGLE ───
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark');
+  const btn = document.getElementById('themeBtn');
+  btn.innerHTML = isDark ? '&#9728;' : '&#9790;';
+  localStorage.setItem('apex-theme', isDark ? 'dark' : 'light');
+}
+// restore theme
+(function(){
+  const saved = localStorage.getItem('apex-theme');
+  if(saved === 'dark'){
+    document.documentElement.classList.add('dark');
+    document.getElementById('themeBtn').innerHTML = '&#9728;';
+  }
+})();
+
+// NAV scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 10), {passive:true});
+
+// REVEAL (with stagger support via IntersectionObserver)
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('in'); }
+    else { e.target.classList.remove('in'); }
+  });
+}, {threshold:0.08, rootMargin:'0px 0px -80px 0px'});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+// ─── FLOATING HERO ELEMENTS: pop in/out on scroll ───
+const floatEls = document.querySelectorAll('.hero-float-el');
+const heroSpotlight = document.querySelector('.hero-spotlight');
+const heroMockup = document.querySelector('.mockup-wrap');
+let floatsVisible = true;
+
+// After initial popIn, hand control to JS
+setTimeout(() => {
+  floatEls.forEach(el => {
+    el.classList.add('js-active');
+    el.style.opacity = '1';
+    el.style.transform = 'scale(1) rotate(var(--rot,0deg))';
+  });
+}, 1800);
+
+// Platform logos pop in on load
+const platLogos = document.querySelectorAll('.platform-logo');
+setTimeout(() => {
+  platLogos.forEach(el => el.classList.add('pop-in'));
+}, 100);
+
+// Platform logos pop out / in on scroll
+let logosVisible = true;
+
+// Pop out / pop in on scroll
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  const threshold = window.innerHeight * 0.35;
+
+  if(y > threshold && floatsVisible){
+    // POP OUT
+    floatsVisible = false;
+    floatEls.forEach((el, i) => {
+      if(!el.classList.contains('js-active')) return;
+      el.style.transition = `opacity 0.4s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.04}s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.04}s`;
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.3) rotate(var(--rot,0deg)) translateY(20px)';
+    });
+    if(heroSpotlight) heroSpotlight.style.opacity = '0';
+    // Logos pop out
+    if(logosVisible){
+      logosVisible = false;
+      platLogos.forEach((el, i) => {
+        el.classList.remove('pop-in');
+        el.classList.add('pop-out');
+      });
+    }
+  } else if(y <= threshold && !floatsVisible){
+    // POP BACK IN
+    floatsVisible = true;
+    floatEls.forEach((el, i) => {
+      if(!el.classList.contains('js-active')) return;
+      el.style.transition = `opacity 0.6s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.06}s, transform 0.6s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.06}s`;
+      el.style.opacity = '1';
+      el.style.transform = 'scale(1) rotate(var(--rot,0deg))';
+    });
+    if(heroSpotlight) heroSpotlight.style.opacity = '1';
+    // Logos pop back in
+    if(!logosVisible){
+      logosVisible = true;
+      platLogos.forEach((el, i) => {
+        el.classList.remove('pop-out');
+        el.style.animationDelay = `${i * 0.12}s`;
+        el.classList.add('pop-in');
+      });
+    }
+  }
+
+  // Mockup parallax
+  if(heroMockup) heroMockup.style.transform = `translateY(${-y * 0.06}px)`;
+}, {passive:true});
+
+// ─── SMOOTH MOUSE GLOW on cards ───
+document.querySelectorAll('.oss-card, .hiw-step, .why-card, .p-card, .testi-card, .faq-item').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const isDark = document.documentElement.classList.contains('dark');
+    const glowColor = isDark ? 'rgba(52,211,153,0.04)' : 'rgba(16,185,129,0.03)';
+    const bgColor = isDark ? '#0e0e22' : '#ffffff';
+    card.style.background = `radial-gradient(600px circle at ${x}px ${y}px, ${glowColor}, ${bgColor} 70%)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.background = '';
+  });
+});
+
+// COUNTERS
+function countUp(el) {
+  const to = parseFloat(el.dataset.count);
+  const sfx = el.dataset.suffix || '';
+  const pfx = el.dataset.prefix || '';
+  const dec = parseInt(el.dataset.decimal) || 0;
+  const dur = 1600;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = to * eased;
+    el.textContent = pfx + (dec ? v.toFixed(dec) : Math.floor(v).toLocaleString()) + sfx;
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = pfx + (dec ? to.toFixed(dec) : to.toLocaleString()) + sfx;
+  }
+  requestAnimationFrame(step);
+}
+const co = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ countUp(e.target); co.unobserve(e.target); } });
+}, {threshold:0.5});
+document.querySelectorAll('[data-count]').forEach(el => co.observe(el));
+
+// PLATFORM TABS
+function switchPlatform(id, btn) {
+  document.querySelectorAll('.platform-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
+  document.getElementById('ps-' + id).classList.add('active');
+  btn.classList.add('on');
+}
+
+// DASHBOARD TABS
+function dbTab(id, btn) {
+  document.querySelectorAll('.db-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.db-tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('dbt-' + id).style.display = 'block';
+  btn.classList.add('on');
+}
+
+// FAQ TOGGLE
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+// WANDA CHAT
+function wandaSend() {
+  const input = document.getElementById('wanda-input');
+  const msgs = document.getElementById('wanda-msgs');
+  const text = input.value.trim();
+  if (!text) return;
+  const userDiv = document.createElement('div');
+  userDiv.style.cssText = 'display:flex;gap:10px;align-items:flex-start;flex-direction:row-reverse';
+  userDiv.innerHTML = `<div style="width:28px;height:28px;border-radius:8px;background:#2a2a2a;border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:rgba(255,255,255,0.5);flex-shrink:0">You</div><div style="background:#1e1e1e;border:1px solid rgba(255,255,255,0.06);border-radius:10px 0 10px 10px;padding:12px 14px;max-width:80%"><div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.85)">${text}</div></div>`;
+  msgs.appendChild(userDiv);
+  input.value = '';
+  setTimeout(() => {
+    const wandaDiv = document.createElement('div');
+    wandaDiv.style.cssText = 'display:flex;gap:10px;align-items:flex-start';
+    wandaDiv.innerHTML = `<div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#34d399,#6ee7b7);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#080808;flex-shrink:0">W</div><div style="background:#121230;border:1px solid rgba(255,255,255,0.06);border-radius:0 10px 10px 10px;padding:12px 14px;max-width:88%"><div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.85)"><span style="color:#fbbf24;font-weight:700">Upgrade Required</span><br><br>Your current plan doesn't include Wanda AI. Upgrade to <span style="color:#34d399;font-weight:600">Growth ($997/mo)</span> or <span style="color:#34d399;font-weight:600">Agency</span> to unlock AI-powered campaign management, competitor intelligence, and auto-optimization.<br><br><span style="color:rgba(255,255,255,0.4)">Wanda can launch campaigns, analyze competitors, generate creatives, and optimize your spend across Meta, Google, and TikTok.</span></div></div>`;
+    msgs.appendChild(wandaDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+</script>
+</body>
+</html>
