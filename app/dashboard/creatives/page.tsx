@@ -241,6 +241,7 @@ BODY COPY:
                   <select value={imageModel} onChange={e => setImageModel(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
                     <option value="dalle3">DALL-E 3 (Best for ads)</option>
                     <option value="imagen">Imagen 4.0 / Nano Banana</option>
+                    <option value="higgsfield">Higgsfield AI</option>
                     <option value="pollinations">Pollinations (Free)</option>
                   </select>
                 </div>

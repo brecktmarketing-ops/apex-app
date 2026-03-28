@@ -8,9 +8,7 @@ interface Message {
 }
 
 export default function WandaPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hey — I\'m Wanda, your AI ad strategist. I can analyze your campaigns, identify what to kill or scale, generate hooks, scan competitors, and optimize your budget. I only see data from YOUR connected ad accounts.\n\nWhat do you want to dig into?' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);

@@ -110,6 +110,50 @@ export async function POST(request: NextRequest) {
         } catch {}
       }
 
+      // Higgsfield — AI image generation
+      if (selectedModel === 'higgsfield') {
+        const hKey = process.env.HIGGSFIELD_API_KEY?.trim();
+        const hSecret = process.env.HIGGSFIELD_API_SECRET?.trim();
+        if (hKey && hSecret) {
+          try {
+            const hRes = await fetch('https://platform.higgsfield.ai/higgsfield-ai/soul/standard', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Key ${hKey}:${hSecret}`,
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                'Origin': 'https://higgsfield.ai',
+                'Referer': 'https://higgsfield.ai/',
+              },
+              body: JSON.stringify({ prompt: `Professional ad creative: ${prompt}`, aspect_ratio: aspect_ratio || '1:1' }),
+            });
+            const hData = await hRes.json();
+            if (hData.request_id) {
+              // Poll for completion
+              for (let i = 0; i < 12; i++) {
+                await new Promise(r => setTimeout(r, 5000));
+                const sRes = await fetch(`https://platform.higgsfield.ai/requests/${hData.request_id}/status`, {
+                  headers: {
+                    'Authorization': `Key ${hKey}:${hSecret}`,
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                    'Origin': 'https://higgsfield.ai',
+                    'Referer': 'https://higgsfield.ai/',
+                  },
+                });
+                const sData = await sRes.json();
+                if (sData.status === 'completed' && sData.images?.[0]?.url) {
+                  const imgRes = await fetch(sData.images[0].url);
+                  const buffer = await imgRes.arrayBuffer();
+                  const base64 = Buffer.from(buffer).toString('base64');
+                  return NextResponse.json({ type: 'image', image: `data:image/png;base64,${base64}`, prompt, model: 'Higgsfield' });
+                }
+                if (sData.status === 'failed') break;
+              }
+            }
+          } catch {}
+        }
+      }
+
       // Pollinations — free fallback, no key needed
       try {
         const encodedPrompt = encodeURIComponent(
