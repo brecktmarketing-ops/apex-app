@@ -660,7 +660,7 @@ html.dark .hero-trust{color:rgba(255,255,255,0.35)}
 
 /* ─── DASHBOARD MOCKUP ─── */
 .mockup-wrap{
-  max-width:1100px;margin:0 auto;
+  max-width:1300px;margin:0 auto;
   animation:fade-up 0.7s ease 0.35s both;
   position:relative;
 }
@@ -714,12 +714,12 @@ html.dark .dashboard{border-color:rgba(255,255,255,0.08);box-shadow:0 32px 80px 
 .up{color:#16a34a}.down{color:#10b981}
 html.dark .up{color:#34d399}html.dark .down{color:#6ee7b7}
 .db-thead{
-  display:grid;grid-template-columns:44px 2.2fr 1fr 1fr 1fr 1fr 1fr 90px;
+  display:grid;grid-template-columns:2.8fr 1fr 1fr 1fr 1fr 80px;
   padding:8px 20px;background:#141414;border-bottom:1px solid rgba(255,255,255,0.06);
 }
 .db-th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)}
 .db-row{
-  display:grid;grid-template-columns:44px 2.2fr 1fr 1fr 1fr 1fr 1fr 90px;
+  display:grid;grid-template-columns:2.8fr 1fr 1fr 1fr 1fr 80px;
   padding:13px 20px;align-items:center;
   border-bottom:1px solid rgba(255,255,255,0.035);
   cursor:pointer;transition:background 0.15s;
@@ -733,13 +733,14 @@ html.dark .up{color:#34d399}html.dark .down{color:#6ee7b7}
 .roas-bar{position:relative;cursor:pointer;transition:all 0.15s}.roas-bar:hover{filter:brightness(1.4);transform:scaleY(1.08);transform-origin:bottom}
 .db-row:last-child{border-bottom:none}
 .db-row:hover{background:rgba(255,255,255,0.025)}
-.db-campaign{display:flex;align-items:center;gap:10px}
+.db-campaign{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
+.db-campaign > div:last-child{min-width:0;overflow:hidden}
 .db-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .db-status.live{background:#34d399;box-shadow:0 0 5px rgba(52,211,153,0.5)}
 .db-status.learning{background:#f0883e;box-shadow:0 0 5px rgba(240,136,62,0.4)}
 .db-status.paused{background:#484f58}
-.db-cname{font-size:13px;font-weight:500;color:#f0f0f5}
-.db-ctype{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px}
+.db-cname{font-size:13px;font-weight:500;color:#f0f0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-ctype{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .db-td{font-size:13px;color:#f0f0f5}
 .db-td.dim{color:rgba(255,255,255,0.5)}
 .db-td.green{color:#34d399;font-weight:600}
@@ -1421,7 +1422,7 @@ footer{
             <div class="db-kpi"><div class="db-kpi-label">Active Campaigns</div><div class="db-kpi-val">12</div><div class="db-kpi-delta" style="color:rgba(255,255,255,0.5)">3 platforms</div></div>
           </div>
           <div class="db-thead">
-            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Platform</div><div class="db-th">Budget</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+            <div class="db-th">Campaign</div><div class="db-th">Platform</div><div class="db-th">Budget</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
           </div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div><div class="db-td">Meta</div><div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td green">5.9x</div><div class="db-td">$3,240</div><div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:80%"></div><div class="spark-b" style="height:95%"></div><div class="spark-b" style="height:100%"></div></div></div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Brand Search | Exact Match</div><div class="db-ctype">Search · Smart Bidding · tCPA $12</div></div></div><div class="db-td">Google</div><div class="db-td">$120/day</div><div class="db-td green">441</div><div class="db-td green">5.1x</div><div class="db-td">$2,660</div><div class="spark"><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:90%"></div></div></div>
@@ -1440,7 +1441,7 @@ footer{
             <div class="db-kpi"><div class="db-kpi-label">Reach</div><div class="db-kpi-val">284K</div><div class="db-kpi-delta up">+11%</div></div>
           </div>
           <div class="db-thead">
-            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Budget</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+            <div class="db-th">Campaign</div><div class="db-th">Budget</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
           </div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div><div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div><div class="spark"><div class="spark-b" style="height:40%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:75%"></div><div class="spark-b" style="height:88%"></div><div class="spark-b" style="height:95%"></div><div class="spark-b" style="height:100%"></div></div></div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike | Top Purchasers 1%</div><div class="db-ctype">Traffic · Manual CPC</div></div></div><div class="db-td">$80/day</div><div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div><div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:58%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:62%"></div><div class="spark-b" style="height:68%"></div><div class="spark-b" style="height:70%"></div></div></div>
@@ -1459,7 +1460,7 @@ footer{
             <div class="db-kpi"><div class="db-kpi-label">Quality Score</div><div class="db-kpi-val">9.2</div><div class="db-kpi-delta up">Top 10%</div></div>
           </div>
           <div class="db-thead">
-            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Type</div><div class="db-th">Clicks</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+            <div class="db-th">Campaign</div><div class="db-th">Type</div><div class="db-th">Clicks</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
           </div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Brand Search | Exact Match</div><div class="db-ctype">Search · Smart Bidding · tCPA $12</div></div></div><div class="db-td">Search</div><div class="db-td green">1,284</div><div class="db-td green">142</div><div class="db-td green">5.1x</div><div class="db-td">$1,700</div><div class="spark"><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:62%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:88%"></div><div class="spark-b" style="height:95%"></div></div></div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Performance Max | All Products</div><div class="db-ctype">PMax · Maximize Conversions</div></div></div><div class="db-td">PMax</div><div class="db-td">1,891</div><div class="db-td green">97</div><div class="db-td green">3.8x</div><div class="db-td">$2,400</div><div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:72%"></div><div class="spark-b" style="height:78%"></div><div class="spark-b" style="height:82%"></div><div class="spark-b" style="height:85%"></div></div></div>
@@ -1477,7 +1478,7 @@ footer{
             <div class="db-kpi"><div class="db-kpi-label">Avg. Hook Rate</div><div class="db-kpi-val">38.2%</div><div class="db-kpi-delta up">Top 5%</div></div>
           </div>
           <div class="db-thead">
-            <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Format</div><div class="db-th">IMPRESSIONS</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+            <div class="db-th">Campaign</div><div class="db-th">Format</div><div class="db-th">IMPRESSIONS</div><div class="db-th">Conv.</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
           </div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">UGC Hook Testing | Round 4</div><div class="db-ctype">Video Views · Spark Ads</div></div></div><div class="db-td">Video</div><div class="db-td green">540K</div><div class="db-td green">218</div><div class="db-td green">4.4x</div><div class="db-td">$1,200</div><div class="spark"><div class="spark-b" style="height:45%"></div><div class="spark-b" style="height:58%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:82%"></div><div class="spark-b" style="height:92%"></div><div class="spark-b" style="height:100%"></div></div></div>
           <div class="db-row"><div class="db-toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.classList.toggle('off')"></div><div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Retargeting | 75% Video Viewers</div><div class="db-ctype">Conversions · Custom Audience</div></div></div><div class="db-td">Video</div><div class="db-td">188K</div><div class="db-td green">141</div><div class="db-td green">3.9x</div><div class="db-td">$1,100</div><div class="spark"><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:68%"></div><div class="spark-b" style="height:72%"></div><div class="spark-b" style="height:75%"></div></div></div>
@@ -1800,21 +1801,21 @@ footer{
           <div class="db-kpi"><div class="db-kpi-label">ROAS</div><div class="db-kpi-val">4.2x</div><div class="db-kpi-delta up">+0.8x</div></div>
         </div>
         <div class="db-thead">
-          <div class="db-th"></div><div class="db-th">Campaign</div><div class="db-th">Budget</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
+          <div class="db-th">Campaign</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
         </div>
         <div class="db-row">
-          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale | Retargeting</div><div class="db-ctype">Conversions · Advantage+</div></div></div>
-          <div class="db-td">$150/day</div><div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div>
+          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale · Retargeting</div><div class="db-ctype">$150/day · Advantage+</div></div></div>
+          <div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div>
           <div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:100%"></div><div class="spark-b" style="height:95%"></div></div>
         </div>
         <div class="db-row">
-          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike | Top Purchasers 1%</div><div class="db-ctype">Traffic · Manual CPC</div></div></div>
-          <div class="db-td">$80/day</div><div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div>
+          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike · Top 1%</div><div class="db-ctype">$80/day · Manual CPC</div></div></div>
+          <div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div>
           <div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div></div>
         </div>
         <div class="db-row">
-          <div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic — Broad</div><div class="db-ctype">Reach · Paused by APEX Kill Rule</div></div></div>
-          <div class="db-td">—</div><div class="db-td dim">66</div><div class="db-td red">$9.85</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div>
+          <div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic · Broad</div><div class="db-ctype">Paused by APEX Kill Rule</div></div></div>
+          <div class="db-td dim">66</div><div class="db-td red">$9.85</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div>
           <div class="spark"><div class="spark-b" style="height:40%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:25%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:15%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:8%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:4%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div>
         </div>
         <div class="db-apex-row">
