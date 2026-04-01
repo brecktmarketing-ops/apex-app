@@ -95,6 +95,7 @@ export default function CompetitorsPage() {
   const [parsed, setParsed] = useState<CompetitorData | null>(null);
   const [adLibraryUrl, setAdLibraryUrl] = useState('');
   const [campaignNames, setCampaignNames] = useState<string[]>([]);
+  const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [manualOverride, setManualOverride] = useState(false);
 
@@ -274,7 +275,28 @@ Be specific to the ${nicheText} niche. Reference real patterns. No generic advic
             </p>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {campaignNames.length > 0 && (
+            <select
+              value={selectedCampaign}
+              onChange={e => {
+                setSelectedCampaign(e.target.value);
+                if (e.target.value !== 'all') {
+                  const campName = e.target.value.replace(/[-_|]/g, ' ').replace(/\b(campaign|cbo|abo|ad set|adset|test|v\d+|round\s*\d+)\b/gi, '').trim();
+                  if (campName) {
+                    setDetectedNiche(campName);
+                    runAnalysis(campName, campaignNames);
+                  }
+                }
+              }}
+              style={{ padding: '8px 12px', background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 8, fontSize: 12, color: 'var(--text)', outline: 'none', fontFamily: 'inherit', cursor: 'pointer', maxWidth: 200 }}
+            >
+              <option value="all">All Campaigns</option>
+              {campaignNames.map((name, i) => (
+                <option key={i} value={name}>{name}</option>
+              ))}
+            </select>
+          )}
           {adLibraryUrl && (
             <a href={adLibraryUrl} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: '#1877f218', border: '1px solid #1877f230', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#1877f2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
               Meta Ad Library

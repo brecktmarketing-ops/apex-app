@@ -63,6 +63,8 @@ export default function PipelinePage() {
     platform: '',
     stage: 'raw' as string,
   });
+  const [metaPermissionError, setMetaPermissionError] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadLeads();
@@ -440,16 +442,22 @@ export default function PipelinePage() {
           </span>
           <button
             onClick={async () => {
+              setMetaPermissionError(false);
+              setSyncMessage(null);
               try {
                 const res = await fetch('/api/ads/meta/leads');
                 const data = await res.json();
-                if (data.newLeads > 0) {
-                  alert(`Synced ${data.newLeads} new leads from Meta!`);
+                if (data.needsPermission) {
+                  setMetaPermissionError(true);
+                } else if (data.newLeads > 0) {
+                  setSyncMessage(`Synced ${data.newLeads} new leads from Meta!`);
                   loadLeads();
+                } else if (data.error) {
+                  setSyncMessage(data.error);
                 } else {
-                  alert(data.error || 'No new leads found');
+                  setSyncMessage('No new leads found');
                 }
-              } catch { alert('Failed to sync leads'); }
+              } catch { setSyncMessage('Failed to sync leads'); }
             }}
             style={{
               padding: '6px 16px',
@@ -483,6 +491,45 @@ export default function PipelinePage() {
           </button>
         </div>
       </div>
+
+      {/* Meta Permission Error Banner */}
+      {metaPermissionError && (
+        <div style={{
+          background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)',
+          borderRadius: 12, padding: '16px 20px', marginBottom: 16,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#fbbf24', marginBottom: 8 }}>Missing Meta Permission: leads_retrieval</div>
+              <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.7 }}>
+                To sync leads from Meta Lead Ads, you need to request the <strong>leads_retrieval</strong> permission:
+              </div>
+              <ol style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.8, margin: '8px 0 0 0', paddingLeft: 20 }}>
+                <li>Go to <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" style={{ color: '#1877f2', textDecoration: 'underline' }}>Meta App Dashboard</a></li>
+                <li>Select your app</li>
+                <li>Go to <strong>App Review &gt; Permissions and Features</strong></li>
+                <li>Search for <strong>leads_retrieval</strong> and click <strong>Request</strong></li>
+                <li>Also request <strong>pages_manage_ads</strong> and <strong>pages_read_engagement</strong> if not already approved</li>
+                <li>Once approved, reconnect your Meta account in Settings</li>
+              </ol>
+            </div>
+            <button onClick={() => setMetaPermissionError(false)} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: 18, cursor: 'pointer', padding: 4, flexShrink: 0 }}>x</button>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Message */}
+      {syncMessage && !metaPermissionError && (
+        <div style={{
+          background: syncMessage.includes('Synced') ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)',
+          border: `1px solid ${syncMessage.includes('Synced') ? 'rgba(16,185,129,0.3)' : 'rgba(107,114,128,0.2)'}`,
+          borderRadius: 10, padding: '10px 16px', marginBottom: 16,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span style={{ fontSize: 13, color: syncMessage.includes('Synced') ? '#34d399' : 'var(--muted)' }}>{syncMessage}</span>
+          <button onClick={() => setSyncMessage(null)} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: 16, cursor: 'pointer' }}>x</button>
+        </div>
+      )}
 
       {/* Add Lead Form */}
       {showAdd && (
