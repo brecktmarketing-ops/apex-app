@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useMode } from '@/lib/mode-context';
+import SimplePlatform from '@/components/simple-platform';
 import type { Campaign } from '@/lib/types';
 
 const DATE_PRESETS = [
@@ -272,7 +274,7 @@ function Chevron({ expanded, size = 14 }: { expanded: boolean; size?: number }) 
   );
 }
 
-export default function MetaPage() {
+function ProMeta() {
   const supabase = createClient();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
@@ -838,6 +840,59 @@ export default function MetaPage() {
         ))}
       </div>
 
+      {/* AI Insights */}
+      {campaigns.length > 0 && (() => {
+        const insights: { type: 'scale' | 'kill' | 'alert' | 'info'; msg: string }[] = [];
+        const totalSpend = campaigns.reduce((s, c) => s + Number(c.spend), 0);
+        const totalRevenue = campaigns.reduce((s, c) => s + Number(c.revenue), 0);
+        const overallRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+
+        campaigns.forEach(c => {
+          const roas = Number(c.roas);
+          const spend = Number(c.spend);
+          const ctr = Number(c.ctr);
+          if (roas >= 3 && spend > 50) {
+            insights.push({ type: 'scale', msg: `"${c.name}" is at ${roas.toFixed(1)}x ROAS — consider scaling budget 20-30%.` });
+          } else if (roas > 0 && roas < 1 && spend > 30) {
+            insights.push({ type: 'kill', msg: `"${c.name}" is at ${roas.toFixed(1)}x ROAS with $${spend.toFixed(0)} spent — kill or restructure.` });
+          } else if (roas >= 1 && roas < 2 && spend > 50) {
+            insights.push({ type: 'alert', msg: `"${c.name}" ROAS is ${roas.toFixed(1)}x — borderline. Monitor for 48hrs before scaling.` });
+          }
+          if (ctr < 0.8 && spend > 30) {
+            insights.push({ type: 'alert', msg: `"${c.name}" CTR is ${ctr.toFixed(2)}% — creative fatigue likely. Test new hooks.` });
+          }
+        });
+
+        if (overallRoas >= 2.5) {
+          insights.unshift({ type: 'info', msg: `Account ROAS is ${overallRoas.toFixed(1)}x — strong performance. Good time to scale top campaigns.` });
+        } else if (overallRoas > 0 && overallRoas < 1.5) {
+          insights.unshift({ type: 'alert', msg: `Account ROAS is ${overallRoas.toFixed(1)}x — below target. Review underperformers.` });
+        }
+
+        if (insights.length === 0) return null;
+
+        const iconMap = { scale: '🚀', kill: '🛑', alert: '⚠️', info: '💡' };
+        const bgMap = { scale: 'rgba(52,211,153,0.08)', kill: 'rgba(248,81,73,0.08)', alert: 'rgba(250,204,21,0.08)', info: 'rgba(96,165,250,0.08)' };
+        const borderMap = { scale: 'rgba(52,211,153,0.2)', kill: 'rgba(248,81,73,0.2)', alert: 'rgba(250,204,21,0.2)', info: 'rgba(96,165,250,0.2)' };
+
+        return (
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>AI Performance Insights</span>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: 'var(--accent-dim)', color: 'var(--accent)' }}>WANDA</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {insights.slice(0, 4).map((ins, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: bgMap[ins.type], border: `1px solid ${borderMap[ins.type]}` }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>{iconMap[ins.type]}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{ins.msg}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Performance Legend */}
       {campaigns.length > 0 && (
         <div style={{ display: 'flex', gap: 16, marginBottom: 12, paddingLeft: 4 }}>
@@ -950,4 +1005,9 @@ export default function MetaPage() {
       {loading && <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>Loading Meta campaigns...</div>}
     </div>
   );
+}
+
+export default function MetaPage() {
+  const { mode } = useMode();
+  return mode === 'simple' ? <SimplePlatform platform="meta" platformName="Meta" platformIcon="◉" syncEndpoint="/api/ads/meta" /> : <ProMeta />;
 }
