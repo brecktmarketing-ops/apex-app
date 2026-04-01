@@ -1800,23 +1800,60 @@ footer{
           <div class="db-kpi"><div class="db-kpi-label">Cost / Result</div><div class="db-kpi-val">$3.48</div><div class="db-kpi-delta up">Improved</div></div>
           <div class="db-kpi"><div class="db-kpi-label">ROAS</div><div class="db-kpi-val">4.2x</div><div class="db-kpi-delta up">+0.8x</div></div>
         </div>
-        <div class="db-thead">
-          <div class="db-th">Campaign</div><div class="db-th">Results</div><div class="db-th">CPR</div><div class="db-th">ROAS</div><div class="db-th">Spend</div><div class="db-th">Trend</div>
-        </div>
-        <div class="db-row">
-          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Spring Sale · Retargeting</div><div class="db-ctype">$150/day · Advantage+</div></div></div>
-          <div class="db-td green">628</div><div class="db-td">$2.18</div><div class="db-td green">5.9x</div><div class="db-td">$1,369</div>
-          <div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:100%"></div><div class="spark-b" style="height:95%"></div></div>
-        </div>
-        <div class="db-row">
-          <div class="db-campaign"><div class="db-status live"></div><div><div class="db-cname">Lookalike · Top 1%</div><div class="db-ctype">$80/day · Manual CPC</div></div></div>
-          <div class="db-td">441</div><div class="db-td">$3.77</div><div class="db-td">3.1x</div><div class="db-td">$1,661</div>
-          <div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div></div>
-        </div>
-        <div class="db-row">
-          <div class="db-campaign"><div class="db-status paused"></div><div><div class="db-cname">Cold Traffic · Broad</div><div class="db-ctype">Paused by APEX Kill Rule</div></div></div>
-          <div class="db-td dim">66</div><div class="db-td red">$9.85</div><div class="db-td red">0.9x</div><div class="db-td dim">$650</div>
-          <div class="spark"><div class="spark-b" style="height:40%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:25%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:15%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:8%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:4%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div>
+        <div class="meta-table">
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+            <colgroup>
+              <col style="width:36px"><col style="width:36%"><col style="width:90px"><col><col><col><col><col><col style="width:70px">
+            </colgroup>
+            <thead>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+                <th></th>
+                <th style="text-align:left;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Campaign</th>
+                <th style="text-align:left;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Delivery</th>
+                <th style="text-align:right;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Budget</th>
+                <th style="text-align:right;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Results</th>
+                <th style="text-align:right;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">CPR</th>
+                <th style="text-align:right;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">ROAS</th>
+                <th style="text-align:right;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Spend</th>
+                <th style="padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:rgba(255,255,255,0.28)">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.035);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.025)'" onmouseout="this.style.background='transparent'">
+                <td style="padding:12px 8px;text-align:center"><div class="db-toggle on"></div></td>
+                <td style="padding:12px 8px"><div style="font-size:13px;font-weight:500;color:#f0f0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Spring Sale · Retargeting</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Sales · Advantage+</div></td>
+                <td style="padding:12px 8px"><span style="font-size:11px;padding:3px 8px;border-radius:4px;background:rgba(52,211,153,0.12);color:#34d399;font-weight:500">Active</span></td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$150/day</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#34d399;font-weight:600">628</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$2.18</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#34d399;font-weight:600">5.9x</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$1,369</td>
+                <td style="padding:12px 8px"><div class="spark"><div class="spark-b" style="height:30%"></div><div class="spark-b" style="height:50%"></div><div class="spark-b" style="height:70%"></div><div class="spark-b" style="height:85%"></div><div class="spark-b" style="height:100%"></div><div class="spark-b" style="height:95%"></div></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.035);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.025)'" onmouseout="this.style.background='transparent'">
+                <td style="padding:12px 8px;text-align:center"><div class="db-toggle on"></div></td>
+                <td style="padding:12px 8px"><div style="font-size:13px;font-weight:500;color:#f0f0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lookalike · Top 1%</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Traffic · Manual CPC</div></td>
+                <td style="padding:12px 8px"><span style="font-size:11px;padding:3px 8px;border-radius:4px;background:rgba(52,211,153,0.12);color:#34d399;font-weight:500">Active</span></td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$80/day</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">441</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$3.77</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">3.1x</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f0f0f5">$1,661</td>
+                <td style="padding:12px 8px"><div class="spark"><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:55%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:60%"></div><div class="spark-b" style="height:65%"></div><div class="spark-b" style="height:70%"></div></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.035);cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,0.025)'" onmouseout="this.style.background='transparent'">
+                <td style="padding:12px 8px;text-align:center"><div class="db-toggle off"></div></td>
+                <td style="padding:12px 8px"><div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Cold Traffic · Broad</div><div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px">Reach · Broad</div></td>
+                <td style="padding:12px 8px"><span style="font-size:11px;padding:3px 8px;border-radius:4px;background:rgba(248,81,73,0.12);color:#f85149;font-weight:500">Killed</span></td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5)">—</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5)">66</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f85149">$9.85</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:#f85149">0.9x</td>
+                <td style="padding:12px 8px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5)">$650</td>
+                <td style="padding:12px 8px"><div class="spark"><div class="spark-b" style="height:40%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:25%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:15%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:8%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:4%;background:rgba(248,81,73,0.3)"></div><div class="spark-b" style="height:2%;background:rgba(248,81,73,0.3)"></div></div></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div class="db-apex-row">
           <div class="db-apex-msg">APEX Kill Rule triggered — "Cold Traffic" paused. CPR exceeded $8.00 threshold. Budget reallocated to top performer.</div>
